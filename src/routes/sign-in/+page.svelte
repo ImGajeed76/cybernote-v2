@@ -1,5 +1,6 @@
 <script lang="ts">
   import { supabaseClient } from "$lib/database";
+  import { goto } from "$app/navigation";
 
   let email = "";
   let password = "";
@@ -9,7 +10,10 @@
     message: ""
   };
 
+  let loading = "";
+
   const handleEmailSignIn = async () => {
+    loading = "loading";
     const { error } = await supabaseClient.auth.signInWithPassword({
       email,
       password
@@ -21,6 +25,10 @@
         status: "error",
         message: error.message
       };
+      loading = "";
+    } else {
+      loading = "";
+      await goto("/")
     }
   };
 
@@ -96,7 +104,7 @@
 
       <input
         type="submit"
-        class="w-full mb-3 btn btn-primary font-bold"
+        class="w-full mb-3 btn btn-primary font-bold {loading}"
         on:click="{handleEmailSignIn}"
         value="Sign In"
       >

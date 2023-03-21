@@ -5,6 +5,8 @@
   let email = "";
   let password = "";
 
+  let loading = "";
+
   let strength = {
     status: "none",
     score: 0,
@@ -23,7 +25,8 @@
     message: ""
   };
 
-  const handleEmailSignIn = async () => {
+  const handleEmailSignUp = async () => {
+    loading = "loading";
     if (strength.status === "ok" && emailStatus.status === "ok") {
       const { error } = await supabaseClient.auth.signUp({
         email,
@@ -36,9 +39,11 @@
           status: "error",
           message: error.message
         };
+        loading = "";
       } else {
         setTimeout(() => {
           setTimeout(() => {
+            loading = "";
             goto("/sign-in")
           }, 1000);
         })
@@ -203,8 +208,8 @@
 
       <input
         type="submit"
-        class="w-full mb-3 btn btn-primary font-bold"
-        on:click="{handleEmailSignIn}"
+        class="w-full mb-3 btn btn-primary font-bold {loading}"
+        on:click="{handleEmailSignUp}"
         value="Sign Up"
       >
     </form>
