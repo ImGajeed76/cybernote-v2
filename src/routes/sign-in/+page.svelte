@@ -1,6 +1,7 @@
 <script lang="ts">
   import { supabaseClient } from "$lib/database";
   import { goto } from "$app/navigation";
+  import { onMount } from "svelte";
 
   let email = "";
   let password = "";
@@ -45,6 +46,14 @@
       };
     }
   };
+
+  onMount(async () => {
+    const { data } = await supabaseClient.auth.getSession();
+
+    if (data.session) {
+      await goto("/app");
+    }
+  })
 </script>
 
 <style>
