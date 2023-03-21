@@ -5,6 +5,8 @@
   let password = "";
   let passwordConfirm = "";
 
+  let loading = "";
+
   let strength = {
     status: "none",
     score: 0,
@@ -23,6 +25,7 @@
   const resetPassword = () => {
     if (password !== passwordConfirm) return;
     if (strength.status !== "ok") return;
+    loading = "loading";
 
     const { error } = supabaseClient.auth.updateUser({ password: password });
 
@@ -30,11 +33,13 @@
       console.log(error);
       message.message = error.message;
       message.color = "text-error";
+      loading = "";
     } else {
       message.message = "Password updated!";
       message.color = "text-success";
 
       setTimeout(() => {
+        loading = "";
         goto("/")
       }, 1000);
     }
@@ -158,7 +163,7 @@
 
 
       <div class="form-control">
-        <input on:click={resetPassword} type="submit" value="send" class="btn btn-primary">
+        <input on:click={resetPassword} type="submit" value="send" class="btn btn-primary {loading}">
       </div>
     </form>
 

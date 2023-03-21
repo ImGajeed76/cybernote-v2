@@ -5,7 +5,11 @@
   let errorMessage = '';
   let message = '';
 
+  let loading = "";
+
   const sendResetLink = () => {
+    loading = "loading";
+
     const {error} = supabaseClient.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`
     });
@@ -20,6 +24,7 @@
 
       email = '';
     }
+    loading = "";
   }
 </script>
 
@@ -50,7 +55,7 @@
         />
       </div>
       <div class="ml-2">
-        <input on:click={sendResetLink} type="submit" value="send" class="btn btn-primary">
+        <input on:click={sendResetLink} type="submit" value="send" class="btn btn-primary {loading}">
       </div>
     </form>
 
