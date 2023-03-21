@@ -29,7 +29,7 @@
       loading = "";
     } else {
       loading = "";
-      await goto("/")
+      window.location.reload();
     }
   };
 

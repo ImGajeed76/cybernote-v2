@@ -76,7 +76,7 @@
         </ul>
       </div>
     {:else}
-      <a href="/sign-in" class="btn btn-ghost" style="z-index: 99">Login</a>
+      <a href="/sign-in" class="btn btn-ghost" style="z-index: 99">Sign In</a>
       <a href="/sign-up" class="btn btn-primary" style="z-index: 99">Sign Up</a>
     {/if}
   </div>
