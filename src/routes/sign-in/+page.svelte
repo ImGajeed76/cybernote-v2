@@ -28,7 +28,6 @@
       };
       loading = "";
     } else {
-      loading = "";
       window.location.reload();
     }
   };

@@ -44,7 +44,6 @@
       } else {
         setTimeout(() => {
           setTimeout(() => {
-            loading = "";
             goto("/sign-in")
           }, 1000);
         })
