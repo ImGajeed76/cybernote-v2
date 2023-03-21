@@ -2,9 +2,37 @@
   import BoardPreview from "./BoardPreview.svelte";
   import { onMount } from "svelte";
   import { supabaseClient } from "$lib/database";
+  import { currentDBUser } from "../../lib/database";
+  import { goto } from "$app/navigation";
 
   let loading = true;
   let loggedIn = false;
+
+  let boards = [];
+  currentDBUser.subscribe((user) => {
+    boards = [];
+    if (user && user.boards) {
+      user.boards.forEach((board) => {
+        boards.push({
+          title: board.title,
+          description: board.description,
+          background: board.background,
+          uuid: board.uuid
+        });
+      });
+    }
+    boards = [...boards];
+  });
+
+  function createNewBoard() {
+    if (!$currentDBUser.boards) $currentDBUser.boards = [];
+    $currentDBUser.boards = [...$currentDBUser.boards, {
+      title: "New board",
+      description: "New board description",
+      background: "",
+      uuid: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    }];
+  }
 
   onMount(async () => {
     const { data, error } = await supabaseClient.auth.getSession();
@@ -32,14 +60,13 @@
     {#if !loading}
       {#if loggedIn}
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 p-10">
-          <BoardPreview />
-          <BoardPreview />
-          <BoardPreview />
-          <BoardPreview />
+          {#each boards as board}
+            <BoardPreview data={board} />
+          {/each}
         </div>
-        <div class="divider">
+        <div class="divider relative bottom-0">
           <div class="divider-content">
-            <button class="btn btn-primary">Create new board</button>
+            <button class="btn btn-primary" on:click={createNewBoard}>Create new board</button>
           </div>
         </div>
       {:else}

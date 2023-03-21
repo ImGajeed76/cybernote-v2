@@ -1,21 +1,17 @@
 <script lang="ts">
 
+  import { goto } from "$app/navigation";
+
   export let data: {
     title: string;
     description: string;
     background: string;
-    onOpen: () => void;
-    onSettings: () => void;
+    uuid: string;
   } = {
     title: "Board Title",
     description: "A short description of the board",
     background: "https://source.unsplash.com/random/?cyberpunk,city",
-    onOpen: () => {
-      return;
-    },
-    onSettings: () => {
-      return;
-    }
+    uuid: "1234567890",
   };
 </script>
 
@@ -28,14 +24,14 @@
 </style>
 
 <div class="card shadow-md bg-base-100 bg-opacity-90 backdrop-blur-md rounded-xl m-6 hover:m-5 duration-200">
-  <div class="card-img rounded-t-xl" style="background-image: url({data.background})"></div>
+  <div class="card-img rounded-t-xl" style="background-image: url({data.background || 'https://source.unsplash.com/random/?cyberpunk,city'})"></div>
   <div class="card-body p-4">
     <h2 class="card-title text-2xl font-semibold text-primary">{data.title}</h2>
     <p class="text-sm">{data.description}</p>
   </div>
   <div class="card-actions pb-4 px-4 justify-between">
-    <button on:click={data.onOpen} class="btn btn-primary btn-sm">Open Board</button>
-    <button on:click={data.onSettings} class="my-auto">
+    <a href="app/board/{data.uuid}" class="btn btn-primary btn-sm">Open Board</a>
+    <a href="app/board/{data.uuid}/settings" class="my-auto">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20"
            class="hover:rotate-90 duration-300">
         <path
@@ -43,6 +39,6 @@
           fill="white"
         ></path>
       </svg>
-    </button>
+    </a>
   </div>
 </div>

@@ -1,7 +1,8 @@
 <script>
   import { onMount } from "svelte";
-  import { supabaseClient } from "$lib/database";
+  import { supabaseClient, currentSession } from "$lib/database";
   import { page } from "$app/stores";
+  import { goto } from "$app/navigation";
 
   let user;
   let activeTab = 0;
@@ -14,18 +15,9 @@
     }
   });
 
-  async function updateUser() {
-    const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
-
-    if (sessionError) {
-      console.log(sessionError);
-      user = null;
-    } else if (sessionData && sessionData.session) {
-      user = sessionData.session.user;
-    } else {
-      user = null;
-    }
-  }
+  currentSession.subscribe((session) => {
+    user = session?.user;
+  });
 
   onMount(async () => {
     if ($page.url.pathname === "/") {
@@ -33,8 +25,6 @@
     } else if ($page.url.pathname.startsWith("/app")) {
       activeTab = 1;
     }
-
-    await updateUser();
   });
 
   async function logout() {
@@ -42,8 +32,7 @@
     if (error) {
       console.log(error);
     } else {
-      await updateUser();
-      window.location.reload();
+      await goto("/")
     }
   }
 </script>
