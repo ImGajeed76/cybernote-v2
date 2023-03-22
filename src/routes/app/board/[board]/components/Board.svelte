@@ -6,6 +6,15 @@
   let background;
   let container;
 
+  function setPos(pos: { left: number; top: number }) {
+    requestAnimationFrame(() => {
+      container.style.left = `${pos.left}px`;
+      container.style.top = `${pos.top}px`;
+
+      pattern.style.backgroundPosition = `${pos.left}px ${pos.top}px`;
+    });
+  }
+
   function drag(event) {
     event = event || window.event;
     event.preventDefault();
@@ -22,12 +31,7 @@
       let left = startLeft + event.clientX - startX;
       let top = startTop + event.clientY - startY;
 
-      requestAnimationFrame(() => {
-        container.style.left = `${left}px`;
-        container.style.top = `${top}px`;
-
-        pattern.style.backgroundPosition = `${left}px ${top}px`;
-      });
+      setPos({ left, top })
 
       document.body.style.cursor = "grabbing";
     };
@@ -71,6 +75,11 @@
   onMount(() => {
     initDrag();
     initDrop();
+
+    setPos({
+      left: window.innerWidth / 2 - container.offsetWidth / 2,
+      top: window.innerHeight / 2 - container.offsetHeight / 2
+    });
   });
 </script>
 

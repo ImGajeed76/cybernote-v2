@@ -5,6 +5,8 @@
   import { currentBoard, currentBoardComponents, currentSession } from "../../../../lib/database";
   import { page } from "$app/stores";
 
+  import BaseComponent from "./components/BaseComponent.svelte";
+
   let components;
   currentBoardComponents.subscribe((value) => {
     components = value;
@@ -127,4 +129,9 @@
 </script>
 
 <Board loadDrop={loadDrop}>
+  <BaseComponent>
+    <h1>My App</h1>
+    <p>Here's some cool text</p>
+    <input class="input" placeholder="test">
+  </BaseComponent>
 </Board>
