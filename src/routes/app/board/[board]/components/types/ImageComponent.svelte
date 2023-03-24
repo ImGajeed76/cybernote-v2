@@ -14,6 +14,8 @@
     getImage(component.component.path).then((resolve) => {
       image.set(resolve);
     });
+    if (position) position.set({...component.component.pos});
+    if (size) size.set({...component.component.size});
   });
 
   let position = writable({ ...component.component.pos });
