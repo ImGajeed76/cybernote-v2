@@ -225,6 +225,12 @@ function debounce(func: any, wait: number) {
 export function deleteDBComponent(componentUUID: string) {
   if (!session) return Promise.reject("Not logged in");
 
+  const component = JSON.parse(lastBoardComponentsString).find((c: any) => c.componentUUID === componentUUID);
+  if (component.type === "image") {
+    deleteFile(component.path);
+  }
+
+
   return supabaseClient
     .from("Components")
     .delete()
