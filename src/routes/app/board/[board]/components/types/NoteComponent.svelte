@@ -15,19 +15,18 @@
   let size = writable({ ...component.component.size });
   let text = writable(component.component.text);
 
-  let lastPosition = {...component.component.pos};
-  let lastSize = {...component.component.size};
-  let lastText = component.component.text;
+  let lastPosition = { ...component.component.pos };
+  let lastSize = { ...component.component.size };
+
+  let isEditing = false;
 
   currentBoardComponents.subscribe((components) => {
     component = components[index];
     if (!component || !component.component) return;
     position.set({ ...component.component.pos });
     size.set({ ...component.component.size });
-    text.set(component.component.text);
+    if (!isEditing) text.set(component.component.text);
   });
-
-  let lastChange = Date.now();
 
   let textarea;
   let placeholder;
@@ -43,32 +42,38 @@
 
   position.subscribe(() => {
     if (JSON.stringify(lastPosition) !== JSON.stringify($position)) {
-      lastPosition = {...$position};
+      lastPosition = { ...$position };
       update();
     }
   });
 
   size.subscribe(() => {
     if (JSON.stringify(lastSize) !== JSON.stringify($size)) {
-      lastSize = {...$size};
+      lastSize = { ...$size };
       update();
     }
+
+    resizeFont();
   });
 
-  text.subscribe(() => {
-    if (lastText !== $text) {
-      lastText = $text;
-      lastChange = Date.now();
+
+  function startEditing() {
+    try {
+      isEditing = true;
+    } catch (_) {
+      return;
     }
+  }
 
-    setTimeout(() => {
-      if (Date.now() - lastChange > 3000) {
-        update();
-        lastChange = Date.now();
-        lastText = $text;
-      }
-    }, 3010);
-  });
+  function stopEditing() {
+    try {
+      isEditing = false;
+      update();
+    } catch (_) {
+      return;
+    }
+  }
+
 
   function resizeFont() {
     if (!textarea) return;
@@ -92,24 +97,20 @@
   }
 
   onMount(() => {
-    setInterval(() => {
-      resizeFont();
-    }, 200);
-
     setTimeout(() => {
-      textarea.oninput = () => {
-        resizeFont();
-      };
-    }, 1000);
+      resizeFont();
+    }, 100);
   });
 </script>
 
 <BaseComponent componentPosition={position} componentSize={size}>
+  <div bind:this={placeholder}
+       class="duration-100 left-0 top-0 text-white/30 w-full h-full absolute bg-transparent justify-center content-center text-center flex flex-col"
+       style="pointer-events: none; overflow: hidden">some text
+  </div>
   <div contenteditable="true"
        class="duration-100 outline-0 w-full h-full bg-neutral p-3 rounded shadow justify-center content-center text-center flex flex-col"
-       style="overflow: hidden" bind:innerHTML={$text} bind:this={textarea}></div>
-  <div bind:this={placeholder}
-       class="left-0 top-0 text-white/30 w-full h-full absolute bg-transparent justify-center content-center text-center flex flex-col"
-       style="pointer-events: none">some text
-  </div>
+       style="overflow: hidden" bind:innerHTML={$text} bind:this={textarea} on:focus={startEditing}
+       on:blur={stopEditing}></div>
+
 </BaseComponent>

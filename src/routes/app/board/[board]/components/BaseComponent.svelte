@@ -68,6 +68,7 @@
     window.addEventListener("click", (event) => {
       if (!baseComponent) return;
       if (event.target === baseComponent || baseComponent.contains(event.target)) return;
+      if (event.target.getAttribute("contenteditable") === "true") return;
       blur();
       activeElement.set(0);
     })
@@ -99,18 +100,15 @@
     }
   }
 
-  function drag(event) {
-    event = event || window.event;
-    event.preventDefault();
-
+  function drag(clientX, clientY) {
     const componentStartPos = {
       left: baseComponent.offsetLeft,
       top: baseComponent.offsetTop
     };
 
     const mouseStartPos = {
-      left: event.clientX,
-      top: event.clientY
+      left: clientX,
+      top: clientY
     };
 
     window.onmousemove = (event) => {
@@ -153,14 +151,19 @@
       if (!baseComponent) return;
       if (background.contains(event.target)) return;
       if ($activeElement === 2) return;
-      drag(event);
-    }
+      drag(event.clientX, event.clientY);
+    };
+
+    baseComponent.ontouchstart = (event) => {
+      if (!baseComponent) return;
+      if (background.contains(event.target)) return;
+      if ($activeElement === 2) return;
+      const touch = event.touches[0];
+      drag(touch.clientX, touch.clientY);
+    };
   }
 
-  function resize(event, direction: {x: number; y: number}) {
-    event = event || window.event;
-    event.preventDefault();
-
+  function resize(event, direction: {x: number; y: number}, clientX, clientY) {
     const componentStartSize = {
       width: baseComponent.offsetWidth,
       height: baseComponent.offsetHeight
@@ -172,8 +175,8 @@
     };
 
     const mouseStartPos = {
-      left: event.clientX,
-      top: event.clientY
+      left: clientX,
+      top: clientY
     };
 
     const posOffset = {x: 0, y: 0};
@@ -237,21 +240,24 @@
   }
 
   function initResize() {
-    resize_sw.onmousedown = (event) => {
-      resize(event, {x: -1, y: 1});
-    }
+    const handleResize = (event, direction) => {
+      event.preventDefault();
+      const clientX = event.clientX || event.touches[0].clientX;
+      const clientY = event.clientY || event.touches[0].clientY;
+      resize(event, direction, clientX, clientY);
+    };
 
-    resize_se.onmousedown = (event) => {
-      resize(event, {x: 1, y: 1});
-    }
+    resize_sw.onmousedown = (event) => handleResize(event, {x: -1, y: 1});
+    resize_sw.ontouchstart = (event) => handleResize(event, {x: -1, y: 1});
 
-    resize_nw.onmousedown = (event) => {
-      resize(event, {x: -1, y: -1});
-    }
+    resize_se.onmousedown = (event) => handleResize(event, {x: 1, y: 1});
+    resize_se.ontouchstart = (event) => handleResize(event, {x: 1, y: 1});
 
-    resize_ne.onmousedown = (event) => {
-      resize(event, {x: 1, y: -1});
-    }
+    resize_nw.onmousedown = (event) => handleResize(event, {x: -1, y: -1});
+    resize_nw.ontouchstart = (event) => handleResize(event, {x: -1, y: -1});
+
+    resize_ne.onmousedown = (event) => handleResize(event, {x: 1, y: -1});
+    resize_ne.ontouchstart = (event) => handleResize(event, {x: 1, y: -1});
   }
 
 

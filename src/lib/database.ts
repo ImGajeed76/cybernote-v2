@@ -3,6 +3,8 @@ import { env } from "$env/dynamic/public";
 import { readable, writable } from "svelte/store";
 import type { Session } from "@supabase/supabase-js";
 
+export const clientId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
 export const supabaseClient = createClient(env.PUBLIC_SUPABASE_URL, env.PUBLIC_SUPABASE_ANON_KEY,
   {
     db: {
@@ -158,6 +160,7 @@ function updateBoardComponents(board: string | null) {
       if (response.error) {
         console.error(response.error);
       } else if (response.data) {
+        if (response.data.length > 0 && response.data[0].clientId === clientId) return;
         const sorted = response.data.sort((a, b) => a.componentUUID.localeCompare(b.componentUUID));
         currentBoardComponents.set(sorted);
       }
@@ -172,6 +175,10 @@ currentBoard.subscribe((board) => {
 });
 
 function updateLocalBoardComponents(components: any[]) {
+  components.forEach((component) => {
+    component.clientId = clientId;
+  });
+
   supabaseClient
     .from("Components")
     .upsert(components)

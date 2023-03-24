@@ -1,8 +1,8 @@
-<script>
-  import BaseComponent from "../BaseComponent.svelte";
+<script lang="ts">
   import { writable } from "svelte/store";
+  import BaseComponent from "../BaseComponent.svelte";
   import { currentBoardComponents } from "$lib/database";
-  import MarkdownInput from "../MarkdownInput.svelte";
+  import { marked } from "marked";
 
   export let index = 0;
 
@@ -13,30 +13,44 @@
 
   let position = writable({ ...component.component.pos });
   let size = writable({ ...component.component.size });
-  let markdown = writable(component.component.markdown);
+  let text = writable(component.component.markdown);
+  let innerHTML = "";
 
   let lastPosition = { ...component.component.pos };
   let lastSize = { ...component.component.size };
-  let lastMarkdown = component.component.text;
 
-  currentBoardComponents.subscribe((components) => {
-    component = components[index];
-    if (!component || !component.component) return;
-    position.set({ ...component.component.pos });
-    size.set({ ...component.component.size });
-    markdown.set(component.component.text);
-  });
+  let isEditing = false;
 
-  let lastChange = Date.now();
+  let textarea;
+  let nonEditingDiv;
 
   function update() {
     currentBoardComponents.update((components) => {
       components[index].component.pos = { ...$position };
       components[index].component.size = { ...$size };
-      components[index].component.markdown = $markdown;
+      components[index].component.markdown = $text;
       return components;
     });
   }
+
+  function startEditing() {
+    isEditing = true;
+    textarea.classList.remove("hidden");
+    nonEditingDiv.classList.add("hidden");
+    textarea.focus();
+  }
+
+  function stopEditing() {
+    isEditing = false;
+    innerHTML = marked($text);
+    textarea.classList.add("hidden");
+    nonEditingDiv.classList.remove("hidden");
+    update();
+  }
+
+  text.subscribe((value) => {
+    innerHTML = marked(value);
+  });
 
   position.subscribe(() => {
     if (JSON.stringify(lastPosition) !== JSON.stringify($position)) {
@@ -52,22 +66,27 @@
     }
   });
 
-  markdown.subscribe(() => {
-    if (lastMarkdown !== $markdown) {
-      lastMarkdown = $markdown;
-      lastChange = Date.now();
-    }
-
-    setTimeout(() => {
-      if (Date.now() - lastChange > 3000) {
-        update();
-        lastChange = Date.now();
-        lastMarkdown = $markdown;
-      }
-    }, 3010);
-  });
+  function handleClick(event) {
+    event.stopPropagation();
+    startEditing();
+  }
 </script>
 
-<BaseComponent>
-  <MarkdownInput />
+<BaseComponent componentPosition={position} componentSize={size}>
+  <div
+    tabindex="0"
+    class="absolute top-0 left-0 duration-100 outline-0 max-w-full w-full h-full bg-neutral p-3 rounded shadow prose"
+    style="overflow: hidden"
+    on:click={handleClick}
+    bind:this={nonEditingDiv}
+  >
+    {@html innerHTML}
+  </div>
+  <textarea
+    class="absolute top-0 left-0 hidden duration-100 outline-0 max-w-full w-full h-full bg-neutral p-3 rounded shadow"
+    style="overflow: hidden; resize: none"
+    bind:value={$text}
+    bind:this={textarea}
+    on:blur={stopEditing}
+  ></textarea>
 </BaseComponent>

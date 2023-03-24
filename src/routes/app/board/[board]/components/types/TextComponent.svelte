@@ -2,6 +2,7 @@
   import { writable } from "svelte/store";
   import BaseComponent from "../BaseComponent.svelte";
   import { currentBoardComponents } from "$lib/database";
+  import { onMount } from "svelte";
 
   export let index = 0;
 
@@ -16,17 +17,34 @@
 
   let lastPosition = {...component.component.pos};
   let lastSize = {...component.component.size};
-  let lastText = component.component.text;
+
+  let isEditing = false;
+
+  function startEditing() {
+    try {
+      isEditing = true;
+    } catch (_) {
+      return;
+    }
+  }
+
+  function stopEditing() {
+    try {
+      isEditing = false;
+      update();
+    } catch (_) {
+      return;
+    }
+  }
+
 
   currentBoardComponents.subscribe((components) => {
     component = components[index];
     if (!component || !component.component) return;
     position.set({ ...component.component.pos });
     size.set({ ...component.component.size });
-    text.set(component.component.text);
+    if (!isEditing) text.set(component.component.text);
   });
-
-  let lastChange = Date.now();
 
   function update() {
     currentBoardComponents.update((components) => {
@@ -50,23 +68,8 @@
       update();
     }
   });
-
-  text.subscribe(() => {
-    if (lastText !== $text) {
-      lastText = $text;
-      lastChange = Date.now();
-    }
-
-    setTimeout(() => {
-      if (Date.now() - lastChange > 3000) {
-        update();
-        lastChange = Date.now();
-        lastText = $text;
-      }
-    }, 3010);
-  });
 </script>
 
 <BaseComponent componentPosition={position} componentSize={size}>
-  <div contenteditable="true" class="outline-0 w-full h-full" bind:innerHTML={$text}></div>
+  <div contenteditable="true" class="outline-0 w-full h-full" bind:innerHTML={$text} on:focus={startEditing} on:blur={stopEditing}></div>
 </BaseComponent>
