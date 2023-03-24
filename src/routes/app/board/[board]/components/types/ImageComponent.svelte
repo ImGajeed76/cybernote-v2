@@ -4,7 +4,7 @@
   import BaseComponent from "../BaseComponent.svelte";
   import { onMount } from "svelte";
 
-  export let index;
+  export let index = 0;
 
   let image = writable("");
   let component = $currentBoardComponents[index];
@@ -14,12 +14,16 @@
     getImage(component.component.path).then((resolve) => {
       image.set(resolve);
     });
-    if (position) position.set({...component.component.pos});
-    if (size) size.set({...component.component.size});
   });
 
   let position = writable({ ...component.component.pos });
   let size = writable({ ...component.component.size });
+  currentBoardComponents.subscribe((components) => {
+    component = components[index];
+    if (!component || !component.component) return;
+    position.set({ ...component.component.pos });
+    size.set({ ...component.component.size });
+  });
 
   function update() {
     currentBoardComponents.update((components) => {

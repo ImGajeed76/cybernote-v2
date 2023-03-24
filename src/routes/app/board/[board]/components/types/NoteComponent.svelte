@@ -9,19 +9,22 @@
   let component = $currentBoardComponents[index];
   currentBoardComponents.subscribe((components) => {
     component = components[index];
-    if (position) position.set({...component.component.pos});
-    if (size) size.set({...component.component.size});
   });
 
   let position = writable({ ...component.component.pos });
   let size = writable({ ...component.component.size });
   let text = writable(component.component.text);
+  currentBoardComponents.subscribe((components) => {
+    component = components[index];
+    if (!component || !component.component) return;
+    position.set({ ...component.component.pos });
+    size.set({ ...component.component.size });
+  });
 
   let lastChange = Date.now();
 
   let textarea;
   let placeholder;
-  let baseComponent;
 
   function update() {
     currentBoardComponents.update((components) => {
