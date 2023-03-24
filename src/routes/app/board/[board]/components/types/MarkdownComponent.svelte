@@ -17,12 +17,14 @@
 
   let lastPosition = {...component.component.pos};
   let lastSize = {...component.component.size};
+  let lastMarkdown = component.component.text;
 
   currentBoardComponents.subscribe((components) => {
     component = components[index];
     if (!component || !component.component) return;
     position.set({ ...component.component.pos });
     size.set({ ...component.component.size });
+    markdown.set(component.component.text);
   });
 
   let lastChange = Date.now();
@@ -51,9 +53,10 @@
   });
 
   markdown.subscribe(() => {
-    if (Date.now() - lastChange > 1000) {
+    if (Date.now() - lastChange > 1000 && lastMarkdown !== $markdown) {
       update();
       lastChange = Date.now();
+      lastMarkdown = $markdown;
     }
   });
 </script>
