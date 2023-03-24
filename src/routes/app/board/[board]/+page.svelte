@@ -1,18 +1,21 @@
 <script lang="ts">
   import Board from "./components/Board.svelte";
-  import { getImage, uploadFile } from "$lib/database";
+  import { uploadFile } from "$lib/database";
   import { onMount } from "svelte";
   import { currentBoard, currentBoardComponents, currentSession } from "../../../../lib/database";
   import { page } from "$app/stores";
 
-  import BaseComponent from "./components/BaseComponent.svelte";
+  import MixedComponent from "./components/MixedComponent.svelte";
 
-  let components;
+  let componentsLength = 0;
   currentBoardComponents.subscribe((value) => {
-    components = value;
+    if (value.length !== componentsLength) {
+      componentsLength = value.length;
+      console.log("componentsLength", componentsLength);
+    }
   });
 
-  async function loadImage(file) {
+  async function loadImage(file, pos: { x: number, y: number } = { x: 0, y: 0 }) {
     const newName = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const { data, error } = await uploadFile(file, "files", newName);
     if (error) return console.log(error);
@@ -21,13 +24,10 @@
       type: "image",
       path: data.path,
       name: file.name,
-      pos: {
-        x: 0,
-        y: 0
-      },
+      pos: pos,
       size: {
-        width: 0,
-        height: 0
+        width: 200,
+        height: 200
       }
     };
 
@@ -39,7 +39,7 @@
     }];
   }
 
-  async function loadText(file) {
+  async function loadText(file, pos: { x: number, y: number } = { x: 0, y: 0 }) {
     let text;
     await new Promise((resolve) => {
       const reader = new FileReader();
@@ -54,13 +54,10 @@
       type: "text",
       text: text,
       name: file.name,
-      pos: {
-        x: 0,
-        y: 0
-      },
+      pos: pos,
       size: {
-        width: 0,
-        height: 0
+        width: 200,
+        height: 200
       }
     };
 
@@ -72,7 +69,7 @@
     }];
   }
 
-  async function loadMarkDown(file) {
+  async function loadMarkDown(file, pos: { x: number, y: number } = { x: 0, y: 0 }) {
     let markdown;
     await new Promise((resolve) => {
       const reader = new FileReader();
@@ -87,13 +84,10 @@
       type: "markdown",
       markdown: markdown,
       name: file.name,
-      pos: {
-        x: 0,
-        y: 0
-      },
+      pos: pos,
       size: {
-        width: 0,
-        height: 0
+        width: 200,
+        height: 200
       }
     };
 
@@ -105,33 +99,48 @@
     }];
   }
 
-  function loadUnknown(file) {
-    if (file.name.endsWith(".md")) return loadMarkDown(file);
+  function loadUnknown(file, pos: { x: number, y: number } = { x: 0, y: 0 }) {
+    if (file.name.endsWith(".md")) return loadMarkDown(file, pos);
     console.log("Unknown file type", file);
   }
 
-  function loadDrop(file) {
+  function loadDrop(file, pos: { x: number, y: number } = { x: 0, y: 0 }) {
     switch (file.type) {
       case "image/png":
       case "image/jpeg":
       case "image/gif":
-        return loadImage(file);
+        return loadImage(file, pos);
       case "text/plain":
-        return loadText(file);
+        return loadText(file, pos);
       default:
-        return loadUnknown(file);
+        return loadUnknown(file, pos);
     }
   }
 
-  onMount(() => {
+  async function untilBoardIsSet() {
+    return new Promise((resolve) => {
+      const interval = setInterval(() => {
+        if ($currentBoard) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, 100);
+    });
+  }
+
+  let loading = true;
+
+  onMount(async () => {
     currentBoard.set($page.params.board);
+    await untilBoardIsSet();
+    loading = false;
   });
 </script>
 
-<Board loadDrop={loadDrop}>
-  <BaseComponent>
-    <h1>My App</h1>
-    <p>Here's some cool text</p>
-    <input class="input" placeholder="test">
-  </BaseComponent>
-</Board>
+{#if !loading}
+  <Board loadDrop={loadDrop}>
+    {#each Array(componentsLength) as _, index}
+      <MixedComponent index={index} />
+    {/each}
+  </Board>
+{/if}

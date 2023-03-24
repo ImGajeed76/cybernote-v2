@@ -60,7 +60,12 @@
       let files = event.dataTransfer.files;
 
       for (const file of files) {
-        loadDrop(file);
+        const pos = {
+          left: event.clientX - container.offsetLeft,
+          top: event.clientY - container.offsetTop
+        };
+
+        loadDrop(file, pos);
       }
     }
   }
@@ -92,6 +97,6 @@
 
 <div class="bg-pattern w-screen h-screen fixed" bind:this={pattern}></div>
 <div class="w-screen h-screen fixed duration-200" bind:this={background}></div>
-<div class="fixed" bind:this={container}>
+<div class="fixed" bind:this={container} style="pointer-events: none">
   <slot />
 </div>

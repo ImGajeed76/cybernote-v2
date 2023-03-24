@@ -65,6 +65,8 @@ export function getImage(path: string) {
   if (images.has(path)) return Promise.resolve(images.get(path));
 
   return new Promise((resolve) => {
+    if (!path) return resolve("");
+
     downloadFile(path).then((response) => {
       if (response.error) {
         console.error(response.error);
@@ -80,10 +82,17 @@ export function getImage(path: string) {
   });
 }
 
+
+const updateBoardComponentsDebounced = debounce(updateBoardComponents, 1000);
+const updateDBUserDebounced = debounce(updateDBUser, 1000);
+const updateLocalBoardComponentsDebounced = debounce(updateLocalBoardComponents, 1000);
+
 export const currentDBUser = writable(null as any);
 let lastDBUser = {};
 export const currentBoard = writable(null as string | null);
+let lastBoard = "";
 export const currentBoardComponents = writable([] as any[]);
+let lastBoardComponentsString = "";
 
 function updateDBUser() {
   if (!session) return;
@@ -136,7 +145,7 @@ currentDBUser.subscribe((user) => {
     });
 });
 
-currentBoard.subscribe((board) => {
+function updateBoardComponents(board: string | null) {
   if (!session) return;
   if (!board) return;
 
@@ -149,15 +158,20 @@ currentBoard.subscribe((board) => {
       if (response.error) {
         console.error(response.error);
       } else if (response.data) {
-        currentBoardComponents.set(response.data);
+        const sorted = response.data.sort((a, b) => a.componentUUID.localeCompare(b.componentUUID));
+        currentBoardComponents.set(sorted);
       }
     });
+}
+
+currentBoard.subscribe((board) => {
+  if (board === lastBoard) return;
+  if (board === null || board === "") currentBoardComponents.set([]);
+  updateBoardComponents(board);
+  lastBoard = board || "";
 });
 
-currentBoardComponents.subscribe((components) => {
-  if (!session) return;
-  if (!components) return;
-
+function updateLocalBoardComponents(components: any[]) {
   supabaseClient
     .from("Components")
     .upsert(components)
@@ -166,11 +180,38 @@ currentBoardComponents.subscribe((components) => {
         console.error(response.error);
       }
     });
+}
+
+currentBoardComponents.subscribe(async (components) => {
+  if (!session) return;
+  if (!components) return;
+
+  if (JSON.stringify(components) === lastBoardComponentsString) return;
+  updateLocalBoardComponents(components);
+  lastBoardComponentsString = JSON.stringify(components);
 });
 
 supabaseClient
-  .channel("any")
-  .on("postgres_changes", { event: "*", schema: "public" }, payload => {
-    updateDBUser();
+  .channel("Users")
+  .on("postgres_changes", { event: "UPDATE", schema: "public" }, payload => {
+    updateDBUserDebounced();
   })
   .subscribe();
+
+supabaseClient
+  .channel("Components")
+  .on("postgres_changes", { event: "UPDATE", schema: "public" }, payload => {
+    if (lastBoard !== "") updateBoardComponentsDebounced(lastBoard);
+  })
+  .subscribe();
+
+function debounce(func: any, wait: number) {
+  let timeout: any;
+  return (...args: any) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      func.apply(this, args);
+    }, wait);
+  };
+}
+

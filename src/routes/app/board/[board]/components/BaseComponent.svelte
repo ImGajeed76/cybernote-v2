@@ -1,201 +1,287 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { writable } from "svelte/store";
+  import { onMount } from "svelte";
 
-  export let data: {
-    focus: () => void;
-    blur: () => void;
-    position: () => { x: number; y: number };
-    size: () => { width: number; height: number };
-  };
+  export let componentPosition = writable({ left: 0, top: 0 });
+  componentPosition.subscribe((value) => {
+    setPos(value);
+  });
+  export let componentSize = writable({ width: 200, height: 200 });
+  componentSize.subscribe((value) => {
+    setSize(value);
+  });
 
+  let baseComponent;
   let background;
-  let front;
-  let resizeDiv;
+  let foreground;
+  let resize_nw;
+  let resize_ne;
+  let resize_sw;
+  let resize_se;
 
-  let lastPos = { x: 0, y: 0 };
-  let lastSize = { width: 0, height: 0 };
+  function blur() {
+    baseComponent.classList.remove("outline-1");
+    baseComponent.classList.add("outline-0");
 
-  const focusedElement = writable(0);
-  focusedElement.subscribe((value) => {
-    if (!background) return;
-    if (!front) return;
+    background.classList.add("hidden");
+
+    document.activeElement.blur();
+  }
+
+  function focus() {
+    baseComponent.classList.remove("outline-0");
+    baseComponent.classList.add("outline-1");
+
+    background.classList.remove("hidden");
+  }
+
+  let activeElement = writable(0);
+  activeElement.subscribe((value) => {
+    if (!baseComponent) return;
 
     switch (value) {
       case 0:
         blur();
-        if (data) data.blur();
+        foreground.classList.remove("hidden");
         break;
       case 1:
         focus();
-        if (data) data.blur();
+        foreground.classList.remove("hidden");
         break;
       case 2:
-        blur();
-        if (data) data.focus();
-        else focus();
+        focus();
+        foreground.classList.add("hidden");
         break;
     }
   });
 
-  function hasActiveElement() {
-    return document.activeElement === background || background.contains(document.activeElement) || $focusedElement === 2;
-  }
-
-  function setPos(pos: { x: number; y: number }) {
-    if (pos.x === lastPos.x && pos.y === lastPos.y) return;
-
-    requestAnimationFrame(() => {
-      background.style.left = `${pos.x}px`;
-      background.style.top = `${pos.y}px`;
+  function initClicks() {
+    background.addEventListener("click", () => {
+      activeElement.set(1);
     });
 
-    lastPos = { ...pos };
+    foreground.addEventListener("click", () => {
+      if ($activeElement === 0) activeElement.set(1);
+      else if ($activeElement === 1) activeElement.set(2);
+    });
+
+    window.addEventListener("click", (event) => {
+      if (!baseComponent) return;
+      if (event.target === baseComponent || baseComponent.contains(event.target)) return;
+      blur();
+      activeElement.set(0);
+    })
+  }
+
+  function setPos(pos: { left: number; top: number }) {
+    try {
+      if (!baseComponent) return;
+
+      requestAnimationFrame(() => {
+        baseComponent.style.left = `${pos.left}px`;
+        baseComponent.style.top = `${pos.top}px`;
+      });
+    } catch (_) {
+      return;
+    }
   }
 
   function setSize(size: { width: number; height: number }) {
-    if (size.width === lastSize.width && size.height === lastSize.height) return;
+    try {
+      if (!baseComponent) return;
 
-    requestAnimationFrame(() => {
-      background.style.width = `${size.width}px`;
-      background.style.height = `${size.height}px`;
-    });
-
-    lastSize = { ...size };
-  }
-
-  function focus() {
-    background.focus();
-    background.classList.remove("outline-0");
-    background.classList.add("outline-1");
-  }
-
-  function blur() {
-    background.blur();
-    background.classList.remove("outline-1");
-    background.classList.add("outline-0");
+      requestAnimationFrame(() => {
+        baseComponent.style.width = `${size.width}px`;
+        baseComponent.style.height = `${size.height}px`;
+      });
+    } catch (_) {
+      return;
+    }
   }
 
   function drag(event) {
     event = event || window.event;
     event.preventDefault();
 
-    const startPos = {
-      x: event.clientX,
-      y: event.clientY
+    const componentStartPos = {
+      left: baseComponent.offsetLeft,
+      top: baseComponent.offsetTop
     };
 
-    const backgroundStartPos = {
-      x: background.offsetLeft,
-      y: background.offsetTop
+    const mouseStartPos = {
+      left: event.clientX,
+      top: event.clientY
     };
 
-    document.body.onmousemove = (event) => {
+    window.onmousemove = (event) => {
       event.preventDefault();
 
-      const position = {
-        x: event.clientX - startPos.x + backgroundStartPos.x,
-        y: event.clientY - startPos.y + backgroundStartPos.y
+      const mousePos = {
+        left: event.clientX,
+        top: event.clientY
       };
 
-      setPos(position);
+      const componentPos = {
+        left: componentStartPos.left + mousePos.left - mouseStartPos.left,
+        top: componentStartPos.top + mousePos.top - mouseStartPos.top
+      };
+
+      setPos(componentPos);
       document.body.style.cursor = "grabbing";
-    };
+    }
 
-    document.body.onmouseup = () => {
-      document.body.onmousemove = null;
-      document.body.onmouseup = null;
-      document.body.style.cursor = "grab";
-
-      if (data) data.position = { ...lastPos } as any;
-      if (data) data.size = { ...lastSize } as any;
-    };
-  }
-
-  function initMouse() {
-    front.onmousedown = (event) => {
-      if (hasActiveElement()) return;
-      drag(event);
-    };
-    front.onmouseleave = () => {
+    window.onmouseup = () => {
+      window.onmousemove = null;
+      window.onmouseup = null;
       document.body.style.cursor = "auto";
-    };
-    front.onmouseenter = () => document.body.style.cursor = "grab";
 
-    front.onclick = (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      focusedElement.update((value) => (value + 1) % 3);
-    };
+      const endPos = {
+        left: baseComponent.offsetLeft,
+        top: baseComponent.offsetTop
+      };
 
-    front.ondblclick = (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      focusedElement.set(2);
-    };
+      if (endPos.left !== componentStartPos.left || endPos.top !== componentStartPos.top) {
+        activeElement.set(0);
+      }
+
+      componentPosition.set(endPos);
+    }
   }
 
-  function resize(event) {
+  function initDrag() {
+    baseComponent.onmousedown = (event) => {
+      if (!baseComponent) return;
+      if (background.contains(event.target)) return;
+      if ($activeElement === 2) return;
+      drag(event);
+    }
+  }
+
+  function resize(event, direction: {x: number; y: number}) {
     event = event || window.event;
     event.preventDefault();
 
-    focusedElement.set(1);
-
-    const startPos = {
-      x: event.clientX,
-      y: event.clientY
+    const componentStartSize = {
+      width: baseComponent.offsetWidth,
+      height: baseComponent.offsetHeight
     };
 
-    const backgroundStartSize = {
-      width: background.offsetWidth,
-      height: background.offsetHeight
+    const componentStartPos = {
+      left: baseComponent.offsetLeft,
+      top: baseComponent.offsetTop
     };
 
-    document.body.onmousemove = (event) => {
+    const mouseStartPos = {
+      left: event.clientX,
+      top: event.clientY
+    };
+
+    const posOffset = {x: 0, y: 0};
+
+    window.onmousemove = (event) => {
       event.preventDefault();
 
-      const size = {
-        width: event.clientX - startPos.x + backgroundStartSize.width,
-        height: event.clientY - startPos.y + backgroundStartSize.height
+      const mousePos = {
+        left: event.clientX,
+        top: event.clientY
       };
 
-      setSize(size);
-      document.body.style.cursor = "nwse-resize";
-    };
+      if (componentStartSize.width + (mousePos.left - mouseStartPos.left) * direction.x < 0) {
+        direction.x *= -1;
+        mouseStartPos.left = mousePos.left;
+        componentStartSize.width = 0;
+      }
+      if (componentStartSize.height + (mousePos.top - mouseStartPos.top) * direction.y < 0) {
+        direction.y *= -1;
+        mouseStartPos.top = mousePos.top;
+        componentStartSize.height = 0;
+      }
 
-    document.body.onmouseup = () => {
-      document.body.onmousemove = null;
-      document.body.onmouseup = null;
+
+      const componentSize = {
+        width: componentStartSize.width + (mousePos.left - mouseStartPos.left) * direction.x,
+        height: componentStartSize.height + (mousePos.top - mouseStartPos.top) * direction.y
+      };
+
+      const componentPos = {
+        left: componentStartPos.left + (mousePos.left - mouseStartPos.left) * (1 - direction.x) / 2 + posOffset.x,
+        top: componentStartPos.top + (mousePos.top - mouseStartPos.top) * (1 - direction.y) / 2 + posOffset.y
+      };
+
+      setSize(componentSize);
+      setPos(componentPos);
+    }
+
+    window.onmouseup = () => {
+      window.onmousemove = null;
+      window.onmouseup = null;
       document.body.style.cursor = "auto";
 
-      if (data) data.position = { ...lastPos } as any;
-      if (data) data.size = { ...lastSize } as any;
-    };
+      const endSize = {
+        width: baseComponent.offsetWidth,
+        height: baseComponent.offsetHeight
+      };
+
+      const endPos = {
+        left: baseComponent.offsetLeft,
+        top: baseComponent.offsetTop
+      };
+
+      if (endSize.width !== componentStartSize.width || endSize.height !== componentStartSize.height) {
+        activeElement.set(0);
+      }
+
+      componentSize.set(endSize);
+      componentPosition.set(endPos);
+    }
   }
 
   function initResize() {
-    resizeDiv.onmouseenter = () => document.body.style.cursor = "nwse-resize";
-    resizeDiv.onmouseleave = () => document.body.style.cursor = "auto";
-    resizeDiv.onmousedown = resize;
+    resize_sw.onmousedown = (event) => {
+      resize(event, {x: -1, y: 1});
+    }
+
+    resize_se.onmousedown = (event) => {
+      resize(event, {x: 1, y: 1});
+    }
+
+    resize_nw.onmousedown = (event) => {
+      resize(event, {x: -1, y: -1});
+    }
+
+    resize_ne.onmousedown = (event) => {
+      resize(event, {x: 1, y: -1});
+    }
   }
 
+
   onMount(() => {
-    initMouse();
+    initClicks();
+    initDrag();
     initResize();
-  });
+
+    setTimeout(() => {
+      setPos($componentPosition);
+      setSize($componentSize);
+    }, 1);
+  })
 </script>
 
-<div class="p-3 outline outline-0 rounded relative" bind:this={background} style="overflow: hidden">
-  <slot />
-  <div class="absolute w-full h-full left-0 top-0" bind:this={front}></div>
-  <div class="absolute w-[20px] h-[20px] bottom-0 right-0" bind:this={resizeDiv} style="z-index: 1">
-    <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-      <g id="SVGRepo_iconCarrier">
-        <path d="M10 20L20 20L20 10" stroke="#fff" stroke-width="2"></path>
-        <path d="M12 17L17 17L17 12" stroke="#fff" stroke-width="2"></path>
-      </g>
-    </svg>
+<div class="outline outline-0 outline-white absolute w-40 h-40" bind:this={baseComponent} style="pointer-events: all">
+  <div class="absolute w-full h-full hidden" bind:this={background} style="cursor: pointer">
+    <div class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute left-[-0.3rem] top-[-0.3rem]" style="cursor: nw-resize" bind:this={resize_nw}></div>
+    <div class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute right-[-0.3rem] top-[-0.3rem]" style="cursor: ne-resize" bind:this={resize_ne}></div>
+    <div class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute left-[-0.3rem] bottom-[-0.3rem]" style="cursor: sw-resize" bind:this={resize_sw}></div>
+    <div class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute right-[-0.3rem] bottom-[-0.3rem]" style="cursor: se-resize" bind:this={resize_se}></div>
+  </div>
+
+  <div class="absolute w-full h-full p-3" style="overflow: hidden; pointer-events: none">
+    <div class="w-full h-full" style="pointer-events: all">
+      <slot/>
+    </div>
+  </div>
+
+  <div class="absolute w-full h-full p-1" style="pointer-events: none">
+    <div class="w-full h-full" bind:this={foreground} style="pointer-events: all"></div>
   </div>
 </div>

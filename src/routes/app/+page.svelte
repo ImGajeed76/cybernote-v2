@@ -2,7 +2,7 @@
   import BoardPreview from "./BoardPreview.svelte";
   import { onMount } from "svelte";
   import { supabaseClient } from "$lib/database";
-  import { currentDBUser } from "../../lib/database";
+  import { currentBoard, currentBoardComponents, currentDBUser } from "../../lib/database";
   import { goto } from "$app/navigation";
 
   let loading = true;
@@ -40,7 +40,10 @@
     if (error) {
       console.log(error);
       loggedIn = false;
-    } else loggedIn = !!data.session;
+    } else {
+      currentBoard.set("");
+      loggedIn = !!data.session;
+    }
 
     loading = false;
   });
