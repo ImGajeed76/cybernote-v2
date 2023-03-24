@@ -11,12 +11,12 @@
     component = components[index];
   });
 
-  let position = writable({...component.component.pos});
-  let size = writable({...component.component.size});
+  let position = writable({ ...component.component.pos });
+  let size = writable({ ...component.component.size });
   let markdown = writable(component.component.markdown);
 
-  let lastPosition = {...component.component.pos};
-  let lastSize = {...component.component.size};
+  let lastPosition = { ...component.component.pos };
+  let lastSize = { ...component.component.size };
   let lastMarkdown = component.component.text;
 
   currentBoardComponents.subscribe((components) => {
@@ -31,8 +31,8 @@
 
   function update() {
     currentBoardComponents.update((components) => {
-      components[index].component.pos = {...$position};
-      components[index].component.size = {...$size};
+      components[index].component.pos = { ...$position };
+      components[index].component.size = { ...$size };
       components[index].component.markdown = $markdown;
       return components;
     });
@@ -40,14 +40,14 @@
 
   position.subscribe(() => {
     if (JSON.stringify(lastPosition) !== JSON.stringify($position)) {
-      lastPosition = {...$position};
+      lastPosition = { ...$position };
       update();
     }
   });
 
   size.subscribe(() => {
     if (JSON.stringify(lastSize) !== JSON.stringify($size)) {
-      lastSize = {...$size};
+      lastSize = { ...$size };
       update();
     }
   });
@@ -58,14 +58,16 @@
       lastChange = Date.now();
     }
 
-    if (Date.now() - lastChange > 3000) {
-      update();
-      lastChange = Date.now();
-      lastMarkdown = $markdown;
-    }
+    setTimeout(() => {
+      if (Date.now() - lastChange > 3000) {
+        update();
+        lastChange = Date.now();
+        lastMarkdown = $markdown;
+      }
+    }, 3010);
   });
 </script>
 
 <BaseComponent>
-  <MarkdownInput/>
+  <MarkdownInput />
 </BaseComponent>

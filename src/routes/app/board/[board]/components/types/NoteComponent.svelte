@@ -59,15 +59,15 @@
     if (lastText !== $text) {
       lastText = $text;
       lastChange = Date.now();
-      console.log("changed")
     }
 
-    if (Date.now() - lastChange > 3000) {
-      update();
-      lastChange = Date.now();
-      lastText = $text;
-      console.log("updated")
-    }
+    setTimeout(() => {
+      if (Date.now() - lastChange > 3000) {
+        update();
+        lastChange = Date.now();
+        lastText = $text;
+      }
+    }, 3010);
   });
 
   function resizeFont() {

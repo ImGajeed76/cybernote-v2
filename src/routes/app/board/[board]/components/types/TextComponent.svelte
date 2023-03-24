@@ -57,11 +57,13 @@
       lastChange = Date.now();
     }
 
-    if (Date.now() - lastChange > 3000) {
-      update();
-      lastChange = Date.now();
-      lastText = $text;
-    }
+    setTimeout(() => {
+      if (Date.now() - lastChange > 3000) {
+        update();
+        lastChange = Date.now();
+        lastText = $text;
+      }
+    }, 3010);
   });
 </script>
 
