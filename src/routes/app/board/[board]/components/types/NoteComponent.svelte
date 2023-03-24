@@ -14,6 +14,10 @@
   let position = writable({ ...component.component.pos });
   let size = writable({ ...component.component.size });
   let text = writable(component.component.text);
+
+  let lastPosition = {...component.component.pos};
+  let lastSize = {...component.component.size};
+
   currentBoardComponents.subscribe((components) => {
     component = components[index];
     if (!component || !component.component) return;
@@ -36,11 +40,17 @@
   }
 
   position.subscribe(() => {
-    update();
+    if (JSON.stringify(lastPosition) !== JSON.stringify($position)) {
+      lastPosition = {...$position};
+      update();
+    }
   });
 
   size.subscribe(() => {
-    update();
+    if (JSON.stringify(lastSize) !== JSON.stringify($size)) {
+      lastSize = {...$size};
+      update();
+    }
   });
 
   text.subscribe(() => {
