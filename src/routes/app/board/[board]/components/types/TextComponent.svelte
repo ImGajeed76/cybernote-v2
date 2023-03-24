@@ -52,7 +52,12 @@
   });
 
   text.subscribe(() => {
-    if (Date.now() - lastChange > 1000 && lastText !== $text) {
+    if (lastText !== $text) {
+      lastText = $text;
+      lastChange = Date.now();
+    }
+
+    if (Date.now() - lastChange > 5000 && lastText !== $text) {
       update();
       lastChange = Date.now();
       lastText = $text;
