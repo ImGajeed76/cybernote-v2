@@ -1,7 +1,7 @@
 <script>
   import { currentBoardComponents, getImage } from "$lib/database";
   import { writable } from "svelte/store";
-  import BaseComponent from "./BaseComponent.svelte";
+  import BaseComponent from "../BaseComponent.svelte";
   import { onMount } from "svelte";
 
   export let index;

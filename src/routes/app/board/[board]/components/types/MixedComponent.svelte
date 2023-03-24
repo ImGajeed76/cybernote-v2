@@ -1,8 +1,10 @@
 <script lang="ts">
-  import { currentBoardComponents } from "../../../../../lib/database";
+  import { currentBoardComponents } from "$lib/database";
   import { onMount } from "svelte";
   import TextComponent from "./TextComponent.svelte";
   import ImageComponent from "./ImageComponent.svelte";
+  import NoteComponent from "./NoteComponent.svelte";
+  import MarkdownComponent from "./MarkdownComponent.svelte";
 
   export let index;
 
@@ -31,6 +33,10 @@
 {#if component}
   {#if component.component.type === "text"}
     <TextComponent index={index} />
+  {:else if component.component.type === "note"}
+    <NoteComponent index={index} />
+  {:else if component.component.type === "markdown"}
+    <MarkdownComponent index={index} />
   {:else if component.component.type === "image"}
     <ImageComponent index={index} />
   {/if}

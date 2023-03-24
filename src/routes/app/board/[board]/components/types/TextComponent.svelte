@@ -1,7 +1,7 @@
 <script lang="ts">
   import { writable } from "svelte/store";
-  import BaseComponent from "./BaseComponent.svelte";
-  import { currentBoardComponents } from "../../../../../lib/database";
+  import BaseComponent from "../BaseComponent.svelte";
+  import { currentBoardComponents } from "$lib/database";
 
   export let index = 0;
 
@@ -13,6 +13,8 @@
   let position = writable({...component.component.pos});
   let size = writable({...component.component.size});
   let text = writable(component.component.text);
+
+  let lastChange = Date.now();
 
   function update() {
     currentBoardComponents.update((components) => {
@@ -32,7 +34,10 @@
   });
 
   text.subscribe(() => {
-    update();
+    if (Date.now() - lastChange > 1000) {
+      update();
+      lastChange = Date.now();
+    }
   });
 </script>
 

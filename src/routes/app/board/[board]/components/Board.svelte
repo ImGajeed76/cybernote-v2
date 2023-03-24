@@ -58,6 +58,7 @@
 
     if (event.type === "drop") {
       let files = event.dataTransfer.files;
+      let data = event.dataTransfer.getData("application/json");
 
       for (const file of files) {
         const pos = {
@@ -65,7 +66,20 @@
           top: event.clientY - container.offsetTop
         };
 
+        console.log(file, pos)
         loadDrop(file, pos);
+      }
+
+      if (data) {
+        const dropData = JSON.parse(data);
+        const pos = {
+          left: event.clientX - container.offsetLeft,
+          top: event.clientY - container.offsetTop
+        };
+        const blob = new Blob([dropData.content], { type: dropData.type });
+
+        console.log(blob, pos)
+        loadDrop(blob, pos);
       }
     }
   }

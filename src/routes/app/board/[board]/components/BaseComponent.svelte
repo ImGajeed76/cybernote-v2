@@ -269,10 +269,10 @@
 
 <div class="outline outline-0 outline-white absolute w-40 h-40" bind:this={baseComponent} style="pointer-events: all">
   <div class="absolute w-full h-full hidden" bind:this={background} style="cursor: pointer">
-    <div class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute left-[-0.3rem] top-[-0.3rem]" style="cursor: nw-resize" bind:this={resize_nw}></div>
-    <div class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute right-[-0.3rem] top-[-0.3rem]" style="cursor: ne-resize" bind:this={resize_ne}></div>
-    <div class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute left-[-0.3rem] bottom-[-0.3rem]" style="cursor: sw-resize" bind:this={resize_sw}></div>
-    <div class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute right-[-0.3rem] bottom-[-0.3rem]" style="cursor: se-resize" bind:this={resize_se}></div>
+    <div class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute left-[-0.3rem] top-[-0.3rem]" style="cursor: nw-resize; z-index: 99" bind:this={resize_nw}></div>
+    <div class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute right-[-0.3rem] top-[-0.3rem]" style="cursor: ne-resize; z-index: 99" bind:this={resize_ne}></div>
+    <div class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute left-[-0.3rem] bottom-[-0.3rem]" style="cursor: sw-resize; z-index: 99" bind:this={resize_sw}></div>
+    <div class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute right-[-0.3rem] bottom-[-0.3rem]" style="cursor: se-resize; z-index: 99" bind:this={resize_se}></div>
   </div>
 
   <div class="absolute w-full h-full p-3" style="overflow: hidden; pointer-events: none">

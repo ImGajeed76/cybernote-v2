@@ -5,7 +5,8 @@
   import { currentBoard, currentBoardComponents, currentSession } from "../../../../lib/database";
   import { page } from "$app/stores";
 
-  import MixedComponent from "./components/MixedComponent.svelte";
+  import MixedComponent from "./components/types/MixedComponent.svelte";
+  import SideBar from "./components/SideBar.svelte";
 
   let componentsLength = 0;
   currentBoardComponents.subscribe((value) => {
@@ -69,6 +70,36 @@
     }];
   }
 
+  async function loadNote(file, pos: { x: number, y: number } = { x: 0, y: 0 }) {
+    let text;
+    await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        text = e.target.result;
+        resolve(text);
+      };
+      reader.readAsText(file);
+    });
+
+    const response = {
+      type: "note",
+      text: text,
+      name: file.name,
+      pos: pos,
+      size: {
+        width: 200,
+        height: 200
+      }
+    };
+
+    $currentBoardComponents = [...$currentBoardComponents, {
+      email: $currentSession?.user?.email,
+      componentUUID: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+      component: response,
+      boardUUID: $currentBoard
+    }];
+  }
+
   async function loadMarkDown(file, pos: { x: number, y: number } = { x: 0, y: 0 }) {
     let markdown;
     await new Promise((resolve) => {
@@ -112,6 +143,10 @@
         return loadImage(file, pos);
       case "text/plain":
         return loadText(file, pos);
+      case "text/note":
+        return loadNote(file, pos);
+      case "text/markdown":
+        return loadMarkDown(file, pos);
       default:
         return loadUnknown(file, pos);
     }
@@ -137,10 +172,13 @@
   });
 </script>
 
-{#if !loading}
-  <Board loadDrop={loadDrop}>
-    {#each Array(componentsLength) as _, index}
-      <MixedComponent index={index} />
-    {/each}
-  </Board>
-{/if}
+<div class="w-full h-full">
+  {#if !loading}
+    <Board loadDrop={loadDrop}>
+      {#each Array(componentsLength) as _, index}
+        <MixedComponent index={index} />
+      {/each}
+    </Board>
+    <SideBar />
+  {/if}
+</div>
