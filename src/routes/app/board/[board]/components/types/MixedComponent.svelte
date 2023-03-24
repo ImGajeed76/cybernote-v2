@@ -25,9 +25,9 @@
     }
   }
 
-  onMount(() => {
-    loadComponent();
-  });
+  function click() {
+    console.log("click");
+  }
 </script>
 
 {#if component}

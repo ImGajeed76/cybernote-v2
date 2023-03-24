@@ -72,7 +72,7 @@
   }
 </script>
 
-<BaseComponent componentPosition={position} componentSize={size}>
+<BaseComponent componentPosition={position} componentSize={size} index={index}>
   <div
     tabindex="0"
     class="absolute top-0 left-0 duration-100 outline-0 max-w-full w-full h-full bg-neutral p-3 rounded shadow prose"

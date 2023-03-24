@@ -60,7 +60,7 @@
   });
 </script>
 
-<BaseComponent componentPosition={position} componentSize={size}>
+<BaseComponent componentPosition={position} componentSize={size} index={index}>
   <img src={$image} class="w-full h-full" alt={component.component.name}
        style="width: 100%; height: 100%; object-fit: cover">
 </BaseComponent>

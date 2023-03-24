@@ -70,6 +70,6 @@
   });
 </script>
 
-<BaseComponent componentPosition={position} componentSize={size}>
+<BaseComponent componentPosition={position} componentSize={size} index={index}>
   <div contenteditable="true" class="outline-0 w-full h-full" bind:innerHTML={$text} on:focus={startEditing} on:blur={stopEditing}></div>
 </BaseComponent>

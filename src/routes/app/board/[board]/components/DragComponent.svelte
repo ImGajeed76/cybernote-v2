@@ -29,6 +29,6 @@
   });
 </script>
 
-<button class="w-full p-4 rounded-box duration-100 hover:p-5 flex justify-center" bind:this={dragComponent}>
+<button class="w-16 h-16 p-4 rounded-box duration-100 hover:p-5 flex justify-center" bind:this={dragComponent}>
   <slot />
 </button>

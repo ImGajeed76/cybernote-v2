@@ -7,16 +7,18 @@
 
   import MixedComponent from "./components/types/MixedComponent.svelte";
   import SideBar from "./components/SideBar.svelte";
+  import { writable } from "svelte/store";
 
   let componentsLength = 0;
   currentBoardComponents.subscribe((value) => {
     if (value.length !== componentsLength) {
       componentsLength = value.length;
-      console.log("componentsLength", componentsLength);
     }
   });
 
-  async function loadImage(file, pos: { x: number, y: number } = { x: 0, y: 0 }) {
+  let containerPos = writable({ top: 0, left: 0 });
+
+  async function loadImage(file, pos: { left: number, top: number } = { left: 0, top: 0 }) {
     const newName = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const { data, error } = await uploadFile(file, "files", newName);
     if (error) return console.log(error);
@@ -40,7 +42,7 @@
     }];
   }
 
-  async function loadText(file, pos: { x: number, y: number } = { x: 0, y: 0 }) {
+  async function loadText(file, pos: { left: number, top: number } = { left: 0, top: 0 }) {
     let text;
     await new Promise((resolve) => {
       const reader = new FileReader();
@@ -70,7 +72,7 @@
     }];
   }
 
-  async function loadNote(file, pos: { x: number, y: number } = { x: 0, y: 0 }) {
+  async function loadNote(file, pos: { left: number, top: number } = { left: 0, top: 0 }) {
     let text;
     await new Promise((resolve) => {
       const reader = new FileReader();
@@ -100,7 +102,7 @@
     }];
   }
 
-  async function loadMarkDown(file, pos: { x: number, y: number } = { x: 0, y: 0 }) {
+  async function loadMarkDown(file, pos: { left: number, top: number } = { left: 0, top: 0 }) {
     let markdown;
     await new Promise((resolve) => {
       const reader = new FileReader();
@@ -130,12 +132,18 @@
     }];
   }
 
-  function loadUnknown(file, pos: { x: number, y: number } = { x: 0, y: 0 }) {
+  function loadUnknown(file, pos: { left: number, top: number } = { left: 0, top: 0 }) {
     if (file.name.endsWith(".md")) return loadMarkDown(file, pos);
     console.log("Unknown file type", file);
   }
 
-  function loadDrop(file, pos: { x: number, y: number } = { x: 0, y: 0 }) {
+  function loadDrop(file, pos: { left: number, top: number } = { left: 0, top: 0 }) {
+    if (pos.left === 0 && pos.top === 0) {
+      pos.left = window.innerWidth / 2 - $containerPos.left;
+      pos.top = window.innerHeight / 2 - $containerPos.top;
+    }
+    console.log(pos)
+
     switch (file.type) {
       case "image/png":
       case "image/jpeg":
@@ -174,11 +182,11 @@
 
 <div class="w-full h-full">
   {#if !loading}
-    <Board loadDrop={loadDrop}>
+    <Board loadDrop={loadDrop} position={containerPos}>
       {#each Array(componentsLength) as _, index}
         <MixedComponent index={index} />
       {/each}
     </Board>
-    <SideBar />
+    <SideBar loadDrop={loadDrop}/>
   {/if}
 </div>

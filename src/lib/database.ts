@@ -135,7 +135,7 @@ currentSession.subscribe(() => {
 currentDBUser.subscribe((user) => {
   if (!user) return;
   if (JSON.stringify(user) === JSON.stringify(lastDBUser)) return;
-  lastDBUser = {...user};
+  lastDBUser = { ...user };
 
   supabaseClient
     .from("Users")
@@ -200,14 +200,14 @@ currentBoardComponents.subscribe(async (components) => {
 
 supabaseClient
   .channel("Users")
-  .on("postgres_changes", { event: "UPDATE", schema: "public" }, payload => {
+  .on("postgres_changes", { event: "*", schema: "public" }, payload => {
     updateDBUserDebounced();
   })
   .subscribe();
 
 supabaseClient
   .channel("Components")
-  .on("postgres_changes", { event: "UPDATE", schema: "public" }, payload => {
+  .on("postgres_changes", { event: "*", schema: "public" }, payload => {
     if (lastBoard !== "") updateBoardComponentsDebounced(lastBoard);
   })
   .subscribe();
@@ -220,5 +220,22 @@ function debounce(func: any, wait: number) {
       func.apply(this, args);
     }, wait);
   };
+}
+
+export function deleteDBComponent(componentUUID: string) {
+  if (!session) return Promise.reject("Not logged in");
+
+  return supabaseClient
+    .from("Components")
+    .delete()
+    .eq("email", session.user.email)
+    .eq("componentUUID", componentUUID)
+    .then((response) => {
+      if (response.error) {
+        console.error(response.error);
+      } else {
+        updateBoardComponents(lastBoard);
+      }
+    });
 }
 

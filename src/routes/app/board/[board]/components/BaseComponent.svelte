@@ -1,6 +1,7 @@
 <script lang="ts">
   import { writable } from "svelte/store";
   import { onMount } from "svelte";
+  import { currentBoardComponents, deleteDBComponent } from "../../../../../lib/database";
 
   export let componentPosition = writable({ left: 0, top: 0 });
   componentPosition.subscribe((value) => {
@@ -10,6 +11,8 @@
   componentSize.subscribe((value) => {
     setSize(value);
   });
+
+  export let index = 0;
 
   let baseComponent;
   let background;
@@ -76,9 +79,8 @@
 
   function setPos(pos: { left: number; top: number }) {
     try {
-      if (!baseComponent) return;
-
       requestAnimationFrame(() => {
+        if (!baseComponent || !baseComponent.style) return;
         baseComponent.style.left = `${pos.left}px`;
         baseComponent.style.top = `${pos.top}px`;
       });
@@ -89,9 +91,8 @@
 
   function setSize(size: { width: number; height: number }) {
     try {
-      if (!baseComponent) return;
-
       requestAnimationFrame(() => {
+        if (!baseComponent || !baseComponent.style) return;
         baseComponent.style.width = `${size.width}px`;
         baseComponent.style.height = `${size.height}px`;
       });
@@ -260,6 +261,19 @@
     resize_ne.ontouchstart = (event) => handleResize(event, {x: 1, y: -1});
   }
 
+  function handleKeyPress(event) {
+    if ((event.key === "Delete" || event.key === "Backspace") && $activeElement === 1) {
+      deleteComponent();
+    }
+  }
+
+  async function deleteComponent() {
+    if (!$currentBoardComponents[index]) return;
+    await deleteDBComponent($currentBoardComponents[index].componentUUID);
+    $currentBoardComponents = $currentBoardComponents.filter((_, i) => i !== index);
+  }
+
+
 
   onMount(() => {
     initClicks();
@@ -270,6 +284,8 @@
       setPos($componentPosition);
       setSize($componentSize);
     }, 1);
+
+    window.addEventListener("keyup", handleKeyPress);
   })
 </script>
 

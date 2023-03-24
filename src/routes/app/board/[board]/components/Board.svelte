@@ -1,6 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { writable } from "svelte/store";
+
   export let loadDrop;
+
+  export let position = writable({ left: 0, top: 0 });
 
   let pattern;
   let background;
@@ -12,6 +16,7 @@
       container.style.top = `${pos.top}px`;
 
       pattern.style.backgroundPosition = `${pos.left}px ${pos.top}px`;
+      position.set(pos);
     });
   }
 
@@ -31,7 +36,7 @@
       let left = startLeft + event.clientX - startX;
       let top = startTop + event.clientY - startY;
 
-      setPos({ left, top })
+      setPos({ left, top });
 
       document.body.style.cursor = "grabbing";
     };
@@ -66,7 +71,7 @@
           top: event.clientY - container.offsetTop
         };
 
-        console.log(file, pos)
+        console.log(file, pos);
         loadDrop(file, pos);
       }
 
@@ -78,7 +83,7 @@
         };
         const blob = new Blob([dropData.content], { type: dropData.type });
 
-        console.log(blob, pos)
+        console.log(blob, pos);
         loadDrop(blob, pos);
       }
     }

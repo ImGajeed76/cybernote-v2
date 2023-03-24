@@ -103,7 +103,7 @@
   });
 </script>
 
-<BaseComponent componentPosition={position} componentSize={size}>
+<BaseComponent componentPosition={position} componentSize={size} index={index}>
   <div bind:this={placeholder}
        class="duration-100 left-0 top-0 text-white/30 w-full h-full absolute bg-transparent justify-center content-center text-center flex flex-col"
        style="pointer-events: none; overflow: hidden">some text
