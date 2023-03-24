@@ -53,15 +53,15 @@
   });
 
   markdown.subscribe(() => {
-    if (Date.now() - lastChange > 3000 && lastMarkdown !== $markdown) {
-      update();
-      lastChange = Date.now();
-      lastMarkdown = $markdown;
-    }
-
     if (lastMarkdown !== $markdown) {
       lastMarkdown = $markdown;
       lastChange = Date.now();
+    }
+
+    if (Date.now() - lastChange > 3000) {
+      update();
+      lastChange = Date.now();
+      lastMarkdown = $markdown;
     }
   });
 </script>
