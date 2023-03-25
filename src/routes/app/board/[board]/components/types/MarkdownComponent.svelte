@@ -72,19 +72,36 @@
   }
 </script>
 
+<style>
+    .scrollable::-webkit-scrollbar {
+        width: 8px;
+        background-color: transparent; /* Make the background transparent */
+    }
+
+    .scrollable::-webkit-scrollbar-track {
+        background-color: transparent;
+        border-radius: 10px;
+    }
+
+    .scrollable::-webkit-scrollbar-thumb {
+        background-color: #4B4B4B;
+        border-radius: 10px;
+    }
+</style>
+
 <BaseComponent componentPosition={position} componentSize={size} index={index}>
   <div
     tabindex="0"
-    class="absolute top-0 left-0 duration-100 outline-0 max-w-full w-full h-full bg-neutral p-3 rounded shadow prose"
-    style="overflow: hidden"
+    class="absolute top-0 left-0 duration-100 outline-0 max-w-full w-full h-full bg-neutral p-3 rounded shadow prose scrollable"
+    style="overflow-x: hidden; overflow-y: auto"
     on:click={handleClick}
     bind:this={nonEditingDiv}
   >
     {@html innerHTML}
   </div>
   <textarea
-    class="absolute top-0 left-0 hidden duration-100 outline-0 max-w-full w-full h-full bg-neutral p-3 rounded shadow"
-    style="overflow: hidden; resize: none"
+    class="absolute top-0 left-0 hidden duration-100 outline-0 max-w-full w-full h-full bg-neutral p-3 rounded shadow scrollable"
+    style="overflow-x: hidden; overflow-y: auto; resize: none"
     bind:value={$text}
     bind:this={textarea}
     on:blur={stopEditing}
