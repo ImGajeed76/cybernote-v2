@@ -1,38 +1,23 @@
-# create-svelte
+[![Apache License 2.0](https://img.shields.io/badge/License-Apache%202.0-green)](https://choosealicense.com/licenses/apache-2.0/)
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
 
-## Creating a project
+# Cyber Note
 
-If you're seeing this, you've probably already done this step. Congrats!
+CyberNote is a free, open-source note-taking app built with SvelteKit, TailwindCSS, DaisyUI, and Supabase. It offers a seamless experience for creating, managing, and syncing unlimited notes across devices. With a user-friendly interface and customization options, CyberNote is your go-to solution for effortlessly capturing ideas and staying organized.
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+You can visit [CyberNote here](https://cybernote-v2.vercel.app/)
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
 
-## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
-```bash
-npm run dev
+## Features
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+- No Board Limits
+- Notes, Images, Markdown
+- Drop Files
 
-## Building
 
-To create a production version of your app:
+## Coming Soon
 
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+- Containers
+- Kanban Boards
