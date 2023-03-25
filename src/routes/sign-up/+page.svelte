@@ -26,7 +26,8 @@
     message: ""
   };
 
-  const handleEmailSignUp = async () => {
+  const handleEmailSignUp = async (event) => {
+    event.preventDefault();
     loading = "loading";
     if (strength.status === "ok" && emailStatus.status === "ok") {
       const { error } = await supabaseClient.auth.signUp({
@@ -43,10 +44,8 @@
         loading = "";
       } else {
         setTimeout(() => {
-          setTimeout(() => {
-            goto("/sign-in")
-          }, 1000);
-        })
+          goto("/sign-in");
+        }, 1000);
       }
     }
   };
@@ -153,7 +152,7 @@
     if (data.session) {
       await goto("/app");
     }
-  })
+  });
 </script>
 
 <style>
@@ -214,12 +213,11 @@
         <progress class="progress mt-3 {strength.color} duration-500" value={strength.currentScore} max="40"></progress>
       </div>
 
-      <input
+      <button
         type="submit"
         class="w-full mb-3 btn btn-primary font-bold {loading}"
         on:click="{handleEmailSignUp}"
-        value="Sign Up"
-      >
+      >Sign Up</button>
     </form>
 
     {#if supabaseError.status === "error"}

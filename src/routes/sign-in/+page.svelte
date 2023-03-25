@@ -110,12 +110,11 @@
         />
       </div>
 
-      <input
+      <button
         type="submit"
         class="w-full mb-3 btn btn-primary font-bold {loading}"
         on:click="{handleEmailSignIn}"
-        value="Sign In"
-      >
+      >Sign In</button>
     </form>
 
     {#if supabaseError.status === "error"}
