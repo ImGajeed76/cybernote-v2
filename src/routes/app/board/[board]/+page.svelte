@@ -132,6 +132,32 @@
     }];
   }
 
+  function loadContainer(file, pos: { left: number, top: number } = { left: 0, top: 0 }) {
+    if (pos.left === 0 && pos.top === 0) {
+      pos.left = window.innerWidth / 2 - $containerPos.left;
+      pos.top = window.innerHeight / 2 - $containerPos.top;
+    }
+    console.log(pos)
+
+    const response = {
+      type: "container",
+      name: file.name,
+      pos: pos,
+      size: {
+        width: 400,
+        height: 400
+      },
+      content: []
+    };
+
+    $currentBoardComponents = [...$currentBoardComponents, {
+      email: $currentSession?.user?.email,
+      componentUUID: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+      component: response,
+      boardUUID: $currentBoard
+    }];
+  }
+
   function loadUnknown(file, pos: { left: number, top: number } = { left: 0, top: 0 }) {
     if (file.name.endsWith(".md")) return loadMarkDown(file, pos);
     console.log("Unknown file type", file);
@@ -155,6 +181,8 @@
         return loadNote(file, pos);
       case "text/markdown":
         return loadMarkDown(file, pos);
+      case "container":
+        return loadContainer(file, pos);
       default:
         return loadUnknown(file, pos);
     }

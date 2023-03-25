@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { writable } from "svelte/store";
+  import { zoom } from "../../../../../lib/stores";
 
   export let loadDrop;
 
@@ -9,6 +10,42 @@
   let pattern;
   let background;
   let container;
+
+  let patternSize = 50;
+
+
+  function handleMouseWheel(event) {
+    event.preventDefault();
+
+    const zoomFactor = 0.05;
+    const newScale = $zoom + (event.deltaY < 0 ? zoomFactor : -zoomFactor);
+
+    if (newScale < 0.001) return;
+
+    const rect = container.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    const newPatternSize = patternSize * newScale;
+
+    const scaleX = x / rect.width;
+    const scaleY = y / rect.height;
+
+    const newLeft = rect.left - (newScale - $zoom) * rect.width * scaleX;
+    const newTop = rect.top - (newScale - $zoom) * rect.height * scaleY;
+
+    container.style.transformOrigin = "0 0";
+    container.style.transform = `scale(${newScale})`;
+
+    pattern.style.backgroundSize = `${newPatternSize}px ${newPatternSize}px`;
+
+    zoom.set(newScale);
+  }
+
+
+  function initZoom() {
+    background.onwheel = handleMouseWheel;
+  }
 
   function setPos(pos: { left: number; top: number }) {
     requestAnimationFrame(() => {
@@ -99,11 +136,14 @@
   onMount(() => {
     initDrag();
     initDrop();
+    initZoom();
 
     setPos({
       left: window.innerWidth / 2 - container.offsetWidth / 2,
       top: window.innerHeight / 2 - container.offsetHeight / 2
     });
+
+    zoom.set(1);
   });
 </script>
 
@@ -112,10 +152,20 @@
         background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
         background-size: 50px 50px;
     }
+
+    .container {
+        pointer-events: none;
+        transition: transform 0.3s ease;
+    }
+
+    .container > * {
+        pointer-events: all;
+    }
 </style>
+
 
 <div class="bg-pattern w-screen h-screen fixed" bind:this={pattern}></div>
 <div class="w-screen h-screen fixed duration-200" bind:this={background}></div>
-<div class="fixed" bind:this={container} style="pointer-events: none">
+<div class="fixed container" bind:this={container} style="pointer-events: none">
   <slot />
 </div>

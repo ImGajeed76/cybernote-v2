@@ -2,6 +2,7 @@
   import { writable } from "svelte/store";
   import { onMount } from "svelte";
   import { currentBoardComponents, deleteDBComponent } from "../../../../../lib/database";
+  import { zoom } from "$lib/stores";
 
   export let componentPosition = writable({ left: 0, top: 0 });
   componentPosition.subscribe((value) => {
@@ -74,7 +75,7 @@
       if (event.target.getAttribute("contenteditable") === "true") return;
       blur();
       activeElement.set(0);
-    })
+    });
   }
 
   function setPos(pos: { left: number; top: number }) {
@@ -108,26 +109,26 @@
     };
 
     const mouseStartPos = {
-      left: clientX,
-      top: clientY
+      left: clientX / $zoom,
+      top: clientY / $zoom
     };
 
     window.onmousemove = (event) => {
       event.preventDefault();
 
       const mousePos = {
-        left: event.clientX,
-        top: event.clientY
+        left: event.clientX / $zoom,
+        top: event.clientY / $zoom
       };
 
       const componentPos = {
-        left: componentStartPos.left + mousePos.left - mouseStartPos.left,
-        top: componentStartPos.top + mousePos.top - mouseStartPos.top
+        left: (componentStartPos.left + mousePos.left - mouseStartPos.left),
+        top: (componentStartPos.top + mousePos.top - mouseStartPos.top)
       };
 
       setPos(componentPos);
       document.body.style.cursor = "grabbing";
-    }
+    };
 
     window.onmouseup = () => {
       window.onmousemove = null;
@@ -144,7 +145,7 @@
       }
 
       componentPosition.set(endPos);
-    }
+    };
   }
 
   function initDrag() {
@@ -164,7 +165,7 @@
     };
   }
 
-  function resize(event, direction: {x: number; y: number}, clientX, clientY) {
+  function resize(event, direction: { x: number; y: number }, clientX, clientY) {
     const componentStartSize = {
       width: baseComponent.offsetWidth,
       height: baseComponent.offsetHeight
@@ -176,18 +177,18 @@
     };
 
     const mouseStartPos = {
-      left: clientX,
-      top: clientY
+      left: clientX / $zoom,
+      top: clientY / $zoom
     };
 
-    const posOffset = {x: 0, y: 0};
+    const posOffset = { x: 0, y: 0 };
 
     window.onmousemove = (event) => {
       event.preventDefault();
 
       const mousePos = {
-        left: event.clientX,
-        top: event.clientY
+        left: event.clientX / $zoom,
+        top: event.clientY / $zoom
       };
 
       if (componentStartSize.width + (mousePos.left - mouseStartPos.left) * direction.x < 0) {
@@ -214,7 +215,7 @@
 
       setSize(componentSize);
       setPos(componentPos);
-    }
+    };
 
     window.onmouseup = () => {
       window.onmousemove = null;
@@ -237,7 +238,7 @@
 
       componentSize.set(endSize);
       componentPosition.set(endPos);
-    }
+    };
   }
 
   function initResize() {
@@ -248,17 +249,17 @@
       resize(event, direction, clientX, clientY);
     };
 
-    resize_sw.onmousedown = (event) => handleResize(event, {x: -1, y: 1});
-    resize_sw.ontouchstart = (event) => handleResize(event, {x: -1, y: 1});
+    resize_sw.onmousedown = (event) => handleResize(event, { x: -1, y: 1 });
+    resize_sw.ontouchstart = (event) => handleResize(event, { x: -1, y: 1 });
 
-    resize_se.onmousedown = (event) => handleResize(event, {x: 1, y: 1});
-    resize_se.ontouchstart = (event) => handleResize(event, {x: 1, y: 1});
+    resize_se.onmousedown = (event) => handleResize(event, { x: 1, y: 1 });
+    resize_se.ontouchstart = (event) => handleResize(event, { x: 1, y: 1 });
 
-    resize_nw.onmousedown = (event) => handleResize(event, {x: -1, y: -1});
-    resize_nw.ontouchstart = (event) => handleResize(event, {x: -1, y: -1});
+    resize_nw.onmousedown = (event) => handleResize(event, { x: -1, y: -1 });
+    resize_nw.ontouchstart = (event) => handleResize(event, { x: -1, y: -1 });
 
-    resize_ne.onmousedown = (event) => handleResize(event, {x: 1, y: -1});
-    resize_ne.ontouchstart = (event) => handleResize(event, {x: 1, y: -1});
+    resize_ne.onmousedown = (event) => handleResize(event, { x: 1, y: -1 });
+    resize_ne.ontouchstart = (event) => handleResize(event, { x: 1, y: -1 });
   }
 
   function handleKeyPress(event) {
@@ -274,7 +275,6 @@
   }
 
 
-
   onMount(() => {
     initClicks();
     initDrag();
@@ -286,24 +286,49 @@
     }, 1);
 
     window.addEventListener("keyup", handleKeyPress);
-  })
+  });
 </script>
 
 <div class="outline outline-0 outline-white absolute w-40 h-40" bind:this={baseComponent} style="pointer-events: all">
   <div class="absolute w-full h-full hidden" bind:this={background} style="cursor: pointer">
-    <div class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute left-[-0.3rem] top-[-0.3rem]" style="cursor: nw-resize; z-index: 99" bind:this={resize_nw}></div>
-    <div class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute right-[-0.3rem] top-[-0.3rem]" style="cursor: ne-resize; z-index: 99" bind:this={resize_ne}></div>
-    <div class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute left-[-0.3rem] bottom-[-0.3rem]" style="cursor: sw-resize; z-index: 99" bind:this={resize_sw}></div>
-    <div class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute right-[-0.3rem] bottom-[-0.3rem]" style="cursor: se-resize; z-index: 99" bind:this={resize_se}></div>
+    <div
+      class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute left-[-0.3rem] top-[-0.3rem]"
+      style="cursor: nw-resize; z-index: 99" bind:this={resize_nw}></div>
+    <div
+      class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute right-[-0.3rem] top-[-0.3rem]"
+      style="cursor: ne-resize; z-index: 99" bind:this={resize_ne}></div>
+    <div
+      class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute left-[-0.3rem] bottom-[-0.3rem]"
+      style="cursor: sw-resize; z-index: 99" bind:this={resize_sw}></div>
+    <div
+      class="rounded-full w-[0.6rem] h-[0.6rem] bg-base-100 outline outline-white outline-1 absolute right-[-0.3rem] bottom-[-0.3rem]"
+      style="cursor: se-resize; z-index: 99" bind:this={resize_se}></div>
   </div>
 
   <div class="absolute w-full h-full p-3" style="overflow: hidden; pointer-events: none">
     <div class="w-full h-full" style="pointer-events: all">
-      <slot/>
+      <slot />
     </div>
   </div>
 
   <div class="absolute w-full h-full p-1" style="pointer-events: none">
     <div class="w-full h-full" bind:this={foreground} style="pointer-events: all"></div>
+  </div>
+
+  <div class="absolute h-[4rem] w-full top-[-5rem] flex justify-center items-center {$activeElement !== 0 ? '' : 'hidden'} duration-300" style="pointer-events: none">
+    <div class="rounded bg-neutral h-full w-fit" style="pointer-events: all">
+      <button class="btn h-full" on:click={deleteComponent}>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+          <path
+            d="M16 1.75V3h5.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H8V1.75C8 .784 8.784 0 9.75 0h4.5C15.216 0 16 .784 16 1.75Zm-6.5 0V3h5V1.75a.25.25 0 0 0-.25-.25h-4.5a.25.25 0 0 0-.25.25ZM4.997 6.178a.75.75 0 1 0-1.493.144L4.916 20.92a1.75 1.75 0 0 0 1.742 1.58h10.684a1.75 1.75 0 0 0 1.742-1.581l1.413-14.597a.75.75 0 0 0-1.494-.144l-1.412 14.596a.25.25 0 0 1-.249.226H6.658a.25.25 0 0 1-.249-.226L4.997 6.178Z"
+            fill="#E57373"
+          ></path>
+          <path
+            d="M9.206 7.501a.75.75 0 0 1 .793.705l.5 8.5A.75.75 0 1 1 9 16.794l-.5-8.5a.75.75 0 0 1 .705-.793Zm6.293.793A.75.75 0 1 0 14 8.206l-.5 8.5a.75.75 0 0 0 1.498.088l.5-8.5Z"
+            fill="#E57373"
+          ></path>
+        </svg>
+      </button>
+    </div>
   </div>
 </div>

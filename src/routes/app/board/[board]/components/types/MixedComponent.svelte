@@ -1,10 +1,10 @@
 <script lang="ts">
   import { currentBoardComponents } from "$lib/database";
-  import { onMount } from "svelte";
   import TextComponent from "./TextComponent.svelte";
   import ImageComponent from "./ImageComponent.svelte";
   import NoteComponent from "./NoteComponent.svelte";
   import MarkdownComponent from "./MarkdownComponent.svelte";
+  import ContainerComponent from "./ContainerComponent.svelte";
 
   export let index;
 
@@ -16,18 +16,6 @@
       component = null;
     }
   });
-
-  function loadComponent() {
-    if ($currentBoardComponents.length > index) {
-      component = $currentBoardComponents[index];
-    } else {
-      component = null;
-    }
-  }
-
-  function click() {
-    console.log("click");
-  }
 </script>
 
 {#if component}
@@ -39,5 +27,7 @@
     <MarkdownComponent index={index} />
   {:else if component.component.type === "image"}
     <ImageComponent index={index} />
+  {:else if component.component.type === "container"}
+    <ContainerComponent index={index} />
   {/if}
 {/if}
