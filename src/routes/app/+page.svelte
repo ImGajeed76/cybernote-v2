@@ -2,8 +2,7 @@
   import BoardPreview from "./BoardPreview.svelte";
   import { onMount } from "svelte";
   import { supabaseClient } from "$lib/database";
-  import { currentBoard, currentBoardComponents, currentDBUser } from "../../lib/database";
-  import { goto } from "$app/navigation";
+  import { currentBoard, currentDBUser, getImage } from "$lib/database";
 
   let loading = true;
   let loggedIn = false;
@@ -12,7 +11,7 @@
   currentDBUser.subscribe((user) => {
     boards = [];
     if (user && user.boards) {
-      user.boards.forEach((board) => {
+      user.boards.forEach(async (board) => {
         boards.push({
           title: board.title,
           description: board.description,

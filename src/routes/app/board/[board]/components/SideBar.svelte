@@ -3,17 +3,40 @@
   import { onMount } from "svelte";
 
   export let loadDrop;
+  export let containerPosition;
 
   let imageInput;
+  let imageComponent;
+
+  function openFileDialog(event) {
+    imageInput.onchange = () => {
+      const selectedFile = imageInput.files[0];
+
+      const pos = {
+        left: event.clientX - containerPosition.left,
+        top: event.clientY - containerPosition.top
+      };
+
+      loadDrop(selectedFile, pos);
+    }
+    imageInput.click();
+  }
+
+  function initNoteDrag () {
+    imageComponent.draggable = true;
+    imageComponent.addEventListener('dragstart', (event) => {
+      event.dataTransfer.setData('no-data', {});
+    });
+
+    imageComponent.addEventListener('dragend', (event) => {
+      event.dataTransfer.clearData();
+      openFileDialog(event);
+    });
+  }
 
   onMount(() => {
-    setTimeout(() => {
-      imageInput.onchange = () => {
-        const selectedFile = imageInput.files[0];
-        loadDrop(selectedFile);
-      }
-    }, 100)
-  })
+    initNoteDrag();
+  });
 </script>
 
 <div class="absolute min-h-full pl-5 grid items-center">
@@ -52,7 +75,7 @@
       </svg>
     </DragComponent>
 
-    <button class="w-16 h-16 p-4 rounded-box duration-100 hover:p-5 flex justify-center relative">
+    <button class="w-16 h-16 p-4 rounded-box duration-100 hover:p-5 flex justify-center" bind:this={imageComponent}>
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
         <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
@@ -64,7 +87,8 @@
           </g>
         </g>
       </svg>
-      <input type="file" class="absolute w-16 h-16 top-0 left-0 file-input file-input-ghost text-transparent" accept="image/png, image/jpeg, image/gif" bind:this={imageInput}>
     </button>
   </div>
 </div>
+
+<input type="file" class="fixed top-[-1000px] left-[-1000px]" accept="image/png, image/jpeg, image/gif" bind:this={imageInput}>

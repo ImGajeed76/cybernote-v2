@@ -187,6 +187,6 @@
         <MixedComponent index={index} />
       {/each}
     </Board>
-    <SideBar loadDrop={loadDrop}/>
+    <SideBar loadDrop={loadDrop} containerPosition={$containerPos}/>
   {/if}
 </div>

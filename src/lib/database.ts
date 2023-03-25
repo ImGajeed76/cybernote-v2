@@ -87,7 +87,6 @@ export function getImage(path: string) {
 
 const updateBoardComponentsDebounced = debounce(updateBoardComponents, 1000);
 const updateDBUserDebounced = debounce(updateDBUser, 1000);
-const updateLocalBoardComponentsDebounced = debounce(updateLocalBoardComponents, 1000);
 
 export const currentDBUser = writable(null as any);
 let lastDBUser = {};
@@ -135,7 +134,7 @@ currentSession.subscribe(() => {
 currentDBUser.subscribe((user) => {
   if (!user) return;
   if (JSON.stringify(user) === JSON.stringify(lastDBUser)) return;
-  lastDBUser = { ...user };
+  lastDBUser = JSON.parse(JSON.stringify(user));
 
   supabaseClient
     .from("Users")

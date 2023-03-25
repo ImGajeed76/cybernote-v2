@@ -1,6 +1,7 @@
 <script lang="ts">
 
-  import { goto } from "$app/navigation";
+  import { onMount } from "svelte";
+  import { getImage } from "../../lib/database";
 
   export let data: {
     title: string;
@@ -13,6 +14,13 @@
     background: "https://source.unsplash.com/random/?cyberpunk,city",
     uuid: "1234567890",
   };
+
+  let image;
+
+  onMount(async () => {
+    if (data.background.startsWith("http") || data.background === "") return image = data.background;
+    image = await getImage(data.background)
+  })
 </script>
 
 <style>
@@ -24,7 +32,7 @@
 </style>
 
 <div class="card shadow-md bg-base-100 bg-opacity-90 backdrop-blur-md rounded-xl m-6 hover:m-5 duration-200">
-  <div class="card-img rounded-t-xl" style="background-image: url({data.background || 'https://source.unsplash.com/random/?cyberpunk,city'})"></div>
+  <div class="card-img rounded-t-xl" style="background-image: url({image || 'https://source.unsplash.com/random/?cyberpunk,city'})"></div>
   <div class="card-body p-4">
     <h2 class="card-title text-2xl font-semibold text-primary">{data.title}</h2>
     <p class="text-sm">{data.description}</p>

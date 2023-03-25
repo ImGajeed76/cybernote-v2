@@ -1,3 +1,16 @@
+<script lang="ts">
+  import { currentSession } from "../lib/database";
+  import { goto } from "$app/navigation";
+
+  function startYourJourney() {
+    if ($currentSession?.user) {
+      goto("/app");
+    } else {
+      goto("/sign-in");
+    }
+  }
+</script>
+
 <style>
     .bg-image {
         background-image: url('/images/background.jpg');
@@ -24,7 +37,7 @@
         </div>
 
         <div class="mt-10">
-          <button class="btn btn-primary">Start your journey</button>
+          <button class="btn btn-primary" on:click={startYourJourney}>Start your journey</button>
         </div>
       </div>
       <div class="md:col-span-2 md:pl-10 pt-10 md:pt-0">
