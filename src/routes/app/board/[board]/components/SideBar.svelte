@@ -8,17 +8,28 @@
   let imageInput;
   let imageComponent;
 
-  function openFileDialog(event) {
-    imageInput.onchange = () => {
-      const selectedFile = imageInput.files[0];
+  function loadImage(event = null) {
+    const selectedFile = imageInput.files[0];
 
-      const pos = {
+    let pos = {
+      left: containerPosition.left / 2,
+      top: containerPosition.top / 2
+    };
+
+    if (event) {
+      pos = {
         left: event.clientX - containerPosition.left,
         top: event.clientY - containerPosition.top
       };
+    }
 
-      loadDrop(selectedFile, pos);
-    };
+    loadDrop(selectedFile, pos);
+    imageInput.value = "";
+    imageInput.onchange = () => loadImage();
+  }
+
+  function openFileDialog(event) {
+    imageInput.onchange = () => loadImage(event);
     imageInput.click();
   }
 
@@ -36,6 +47,7 @@
 
   onMount(() => {
     initNoteDrag();
+    imageInput.onchange = () => loadImage();
   });
 </script>
 
@@ -75,7 +87,8 @@
       </svg>
     </DragComponent>
 
-    <button class="w-16 h-16 p-4 rounded-box duration-100 hover:p-5 flex justify-center" bind:this={imageComponent}>
+    <button class="w-16 h-16 p-4 rounded-box duration-100 hover:p-5 flex justify-center relative"
+            bind:this={imageComponent} style="overflow: hidden">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
         <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
@@ -87,7 +100,34 @@
           </g>
         </g>
       </svg>
+
+      <input type="file" class="absolute left-0 file-input file-input-ghost text-transparent"
+             accept="image/png, image/jpeg, image/gif"
+             bind:this={imageInput}>
     </button>
+
+    <DragComponent name="todo" type="todo" content="">
+      <svg fill="#fff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+        <g id="SVGRepo_iconCarrier">
+          <path
+            d="M2,11H8a1,1,0,0,0,1-1V4A1,1,0,0,0,8,3H2A1,1,0,0,0,1,4v6A1,1,0,0,0,2,11ZM3,5H7V9H3ZM8,21a1,1,0,0,0,1-1V14a1,1,0,0,0-1-1H2a1,1,0,0,0-1,1v6a1,1,0,0,0,1,1ZM3,15H7v4H3ZM23,7a1,1,0,0,1-1,1H12a1,1,0,0,1,0-2H22A1,1,0,0,1,23,7Zm0,10a1,1,0,0,1-1,1H12a1,1,0,0,1,0-2H22A1,1,0,0,1,23,17Z"></path>
+        </g>
+      </svg>
+    </DragComponent>
+
+    <DragComponent name="code_block" type="text/code_block" content="">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+        <g id="SVGRepo_iconCarrier">
+          <path fill-rule="evenodd" clip-rule="evenodd"
+                d="M9.70711 6.29289C10.0976 6.68342 10.0976 7.31658 9.70711 7.70711L5.41421 12L9.70711 16.2929C10.0976 16.6834 10.0976 17.3166 9.70711 17.7071C9.31658 18.0976 8.68342 18.0976 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929L8.29289 6.29289C8.68342 5.90237 9.31658 5.90237 9.70711 6.29289ZM14.2929 6.29289C14.6834 5.90237 15.3166 5.90237 15.7071 6.29289L20.7071 11.2929C21.0976 11.6834 21.0976 12.3166 20.7071 12.7071L15.7071 17.7071C15.3166 18.0976 14.6834 18.0976 14.2929 17.7071C13.9024 17.3166 13.9024 16.6834 14.2929 16.2929L18.5858 12L14.2929 7.70711C13.9024 7.31658 13.9024 6.68342 14.2929 6.29289Z"
+                fill="#fff"></path>
+        </g>
+      </svg>
+    </DragComponent>
 
     <DragComponent name="container" type="container" content="">
       <svg fill="#fff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -101,6 +141,3 @@
     </DragComponent>
   </div>
 </div>
-
-<input type="file" class="fixed top-[-1000px] left-[-1000px]" accept="image/png, image/jpeg, image/gif"
-       bind:this={imageInput}>
