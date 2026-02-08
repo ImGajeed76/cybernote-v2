@@ -119,8 +119,6 @@
           top: event.clientY - container.offsetTop
         };
         const blob = new Blob([dropData.content], { type: dropData.type });
-
-        console.log(blob, pos);
         loadDrop(blob, pos);
       }
     }

@@ -39,7 +39,8 @@
 
 <div class="navbar bg-neutral fixed h-16 shadow-2xl" style="z-index: 1">
   <div class="flex-1">
-    <a class="btn btn-ghost normal-case text-xl" href="/">CyberNote</a>
+    <a class="btn btn-ghost normal-case text-xl" href="/" style="z-index: 99">
+      <img src="/CyberNote-C-Trans.png" class="h-8 mr-2">CyberNote</a>
     <div class="absolute w-[99vw] flex invisible md:visible">
       <div class="tabs m-auto">
         <a href="/" class="tab tab-bordered {activeTab === 0 ? 'tab-active' : ''} duration-500 outline-none">Home</a>
