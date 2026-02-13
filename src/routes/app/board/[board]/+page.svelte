@@ -158,6 +158,56 @@
     }];
   }
 
+  async function loadCodeBlock(file, pos: { left: number, top: number } = { left: 0, top: 0 }) {
+    let code;
+    await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        code = e.target.result;
+        resolve(code);
+      };
+      reader.readAsText(file);
+    });
+
+    const response = {
+      type: "code_block",
+      code: code,
+      name: file.name,
+      pos: pos,
+      size: {
+        width: 400,
+        height: 200
+      }
+    };
+
+    $currentBoardComponents = [...$currentBoardComponents, {
+      email: $currentSession?.user?.email,
+      componentUUID: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+      component: response,
+      boardUUID: $currentBoard
+    }];
+  }
+
+  function loadToDo(file, pos: { left: number, top: number } = { left: 0, top: 0 }) {
+    const response = {
+      type: "todo",
+      name: file.name,
+      pos: pos,
+      size: {
+        width: 600,
+        height: 200
+      },
+      todos: [],
+      title: "To Do"
+    };
+
+    $currentBoardComponents = [...$currentBoardComponents, {
+      email: $currentSession?.user?.email,
+      componentUUID: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+      component: response,
+      boardUUID: $currentBoard
+    }];
+  }
   function loadUnknown(file, pos: { left: number, top: number } = { left: 0, top: 0 }) {
     if (file.name.endsWith(".md")) return loadMarkDown(file, pos);
     console.log("Unknown file type", file);
@@ -168,7 +218,6 @@
       pos.left = window.innerWidth / 2 - $containerPos.left;
       pos.top = window.innerHeight / 2 - $containerPos.top;
     }
-    console.log(pos)
 
     switch (file.type) {
       case "image/png":
@@ -183,6 +232,10 @@
         return loadMarkDown(file, pos);
       case "container":
         return loadContainer(file, pos);
+      case "text/code_block":
+        return loadCodeBlock(file, pos);
+      case "todo":
+        return loadToDo(file, pos);
       default:
         return loadUnknown(file, pos);
     }
