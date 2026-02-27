@@ -12,7 +12,7 @@
 
   let position = writable({...component.component.pos});
   let size = writable({...component.component.size});
-  let text = writable(component.component.text);
+  let code = writable(component.component.code);
 
   let lastPosition = {...component.component.pos};
   let lastSize = {...component.component.size};
@@ -42,14 +42,14 @@
     if (!component || !component.component) return;
     position.set({ ...component.component.pos });
     size.set({ ...component.component.size });
-    if (!isEditing) text.set(component.component.text);
+    if (!isEditing) code.set(component.component.code);
   });
 
   function update() {
     currentBoardComponents.update((components) => {
       components[index].component.pos = {...$position};
       components[index].component.size = {...$size};
-      components[index].component.text = $text;
+      components[index].component.code = $code;
       return components;
     });
   }
@@ -69,6 +69,7 @@
   });
 </script>
 
+
 <BaseComponent componentPosition={position} componentSize={size} index={index}>
-  <div contenteditable="true" class="outline-0 w-full h-full" bind:innerHTML={$text} on:focus={startEditing} on:blur={stopEditing}></div>
+  <p class="text-2xl">Coming soon</p>
 </BaseComponent>
